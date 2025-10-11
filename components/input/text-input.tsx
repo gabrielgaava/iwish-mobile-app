@@ -1,8 +1,10 @@
 import { Control, Controller } from "react-hook-form";
-import { StyleProp, TextInput } from "react-native";
+import { StyleProp, TextInput, View } from "react-native";
+import { styles } from "./styles";
 
 export const InputText = ({ control, rules, name, label, style }: Props) => {
   return (
+    <View style={styles.container}>
     <Controller
       control={control}
       rules={{ required: rules.required }}
@@ -12,13 +14,14 @@ export const InputText = ({ control, rules, name, label, style }: Props) => {
           onBlur={onBlur}
           onChangeText={onChange}
           value={value}
-          style={style}
+          style={[style, styles.input]}
           secureTextEntry={rules.isPassword || false}
           keyboardType={getKeyBoardType(rules)}
         />
       )}
       name={name}
     />
+    </View>
   );
 };
 
@@ -42,5 +45,5 @@ type Props = {
   rules: Settings;
   name: string;
   label: string;
-  style: StyleProp<any>;
+  style?: StyleProp<any>;
 };

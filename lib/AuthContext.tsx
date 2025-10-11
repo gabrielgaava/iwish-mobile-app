@@ -29,7 +29,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [isReady, setIsReady] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
-  const authState = authClient.useSession();
+  const authState = {} as any;
 
   const logIn = async (email: string, password: string) => {
     const { data } = await authClient.signIn.email({
@@ -56,17 +56,20 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {  
     if(!authState.isPending) {
-        setIsReady(true);
-        setIsLoggedIn(!!authState.data);
-        setUser(authState.data?.user ?? null);
+      setIsReady(true);
+      setIsLoggedIn(!!authState.data);
+      setUser(authState.data?.user ?? null);
     } 
-  }, []);
+  }, [authState]);
 
   useEffect(() => {
+    console.log("Ready ?", isReady)
     if (isReady) {
       SplashScreen.hideAsync();
     }
   }, [isReady]);
+
+  console.log("Login State", isLoggedIn, user);
 
   return (
     <AuthContext.Provider
