@@ -3,11 +3,12 @@ import { InputText } from "@/components/input";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { useTheme } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { StyleSheet, Text, View } from "react-native";
+import { useTheme } from "styled-components/native";
 
 type LoginForm = {
   email: string;
@@ -15,7 +16,8 @@ type LoginForm = {
 };
 
 export default function LoginScreen() {
-  const theme = useTheme();
+  const router = useRouter();
+  const { colors } = useTheme();
   const [isFetching, setIsFetching] = useState(false);
 
   const { control, handleSubmit } = useForm({
@@ -34,17 +36,21 @@ export default function LoginScreen() {
     }, 2000);
   };
 
-  console.log(theme);
+  const goToRecovery = () => {
+    router.push("/recovery"); 
+  }
+
+  console.log(colors);
 
   return (
     <ThemedView style={styles.screen}>
       <LinearGradient
-        colors={["#4c6ef5", "#5a1ea3ff"]}
+        colors={colors.primaryGradient}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.header}
       >
-        <AntDesign name="shopping" size={36} color="#FFFFFF80" />
+        <AntDesign name="shopping" size={36} color={colors.white70} />
         <ThemedText style={styles.headerText}>iWish</ThemedText>
       </LinearGradient>
 
@@ -71,7 +77,7 @@ export default function LoginScreen() {
           />
           <LinkButton
             text="Forgot your password ?"
-            onPress={() => {}}
+            onPress={() => goToRecovery()}
             textAlign="center"
             style={{ marginTop: 20 }}
           />
@@ -90,12 +96,12 @@ export default function LoginScreen() {
             <BorderButton
               onPress={() => {}}
               text="Google"
-              icon={<AntDesign name="google" color={"#FFF"} size={20} />}
+              icon={<AntDesign name="google" color={colors.textContrast} size={20} />}
             />
             <BorderButton
               onPress={() => {}}
               text="Facebook"
-              icon={<AntDesign name="instagram" color={"#FFF"} size={20} />}
+              icon={<AntDesign name="instagram" color={colors.textContrast} size={20} />}
             />
           </View>
         </View>
