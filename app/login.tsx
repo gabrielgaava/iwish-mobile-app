@@ -1,30 +1,40 @@
 import { ActionButton, BorderButton, LinkButton } from "@/components/buttons";
-import { InputText } from "@/components/input/text-input";
+import { InputText } from "@/components/input";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { useTheme } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
+import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { StyleSheet, Text, View } from "react-native";
 
 type LoginForm = {
-  email: string,
-  password: string
-}
+  email: string;
+  password: string;
+};
 
 export default function LoginScreen() {
+  const theme = useTheme();
+  const [isFetching, setIsFetching] = useState(false);
 
   const { control, handleSubmit } = useForm({
     defaultValues: {
       email: "",
       password: "",
-    }
+    },
   });
 
   const onSubmit: SubmitHandler<LoginForm> = (data) => {
-    console.log("Submit!")
     console.log(data);
-  }
+    setIsFetching(true);
+    setTimeout(() => {
+      console.log("Submit!");
+      setIsFetching(false);
+    }, 2000);
+  };
+
+  console.log(theme);
 
   return (
     <ThemedView style={styles.screen}>
@@ -34,7 +44,7 @@ export default function LoginScreen() {
         end={{ x: 1, y: 1 }}
         style={styles.header}
       >
-        <AntDesign name="shopping" size={36} color="#FFFFFF80"/>
+        <AntDesign name="shopping" size={36} color="#FFFFFF80" />
         <ThemedText style={styles.headerText}>iWish</ThemedText>
       </LinearGradient>
 
@@ -42,13 +52,32 @@ export default function LoginScreen() {
         <ThemedText style={styles.title}>Welcome Back!</ThemedText>
         <ThemedText style={styles.subText}>Enter your details below</ThemedText>
         <View style={styles.loginForm}>
-          <InputText control={control} name="email" label="Email" rules={{isEmail: true, required: true}}/>
-          <InputText control={control} name="password" label="Email" rules={{isPassword: true, required: true}}/>
-          <ActionButton onPress={handleSubmit(onSubmit)} text="Sign in" loading={true}/>
+          <InputText
+            control={control}
+            name="email"
+            label="Email"
+            rules={{ isEmail: true, required: true }}
+          />
+          <InputText
+            control={control}
+            name="password"
+            label="Password"
+            rules={{ isPassword: true, required: true }}
+          />
+          <ActionButton
+            onPress={handleSubmit(onSubmit)}
+            text="Sign in"
+            loading={isFetching}
+          />
+          <LinkButton
+            text="Forgot your password ?"
+            onPress={() => {}}
+            textAlign="center"
+            style={{ marginTop: 20 }}
+          />
         </View>
 
-        <View>
-          <LinkButton text="Forgot your password ?" onPress={() => {}}/>
+        <View style={styles.footerSection}>
           <View style={styles.orSection}>
             <View style={styles.divider} />
             <View style={styles.orText}>
@@ -56,20 +85,19 @@ export default function LoginScreen() {
             </View>
             <View style={styles.divider} />
           </View>
-        </View>
-        
-      
-        <View style={styles.socialButtons}>
-          <BorderButton 
-            onPress={() => {}} 
-            text="Google" 
-            icon={<AntDesign name="google" color={'#FFF'} size={20}/>}
-          />
-          <BorderButton 
-            onPress={() => {}} 
-            text="Facebook"
-            icon={<AntDesign name="instagram" color={'#FFF'} size={20}/>}
-          />
+
+          <View style={styles.socialButtons}>
+            <BorderButton
+              onPress={() => {}}
+              text="Google"
+              icon={<AntDesign name="google" color={"#FFF"} size={20} />}
+            />
+            <BorderButton
+              onPress={() => {}}
+              text="Facebook"
+              icon={<AntDesign name="instagram" color={"#FFF"} size={20} />}
+            />
+          </View>
         </View>
       </ThemedView>
     </ThemedView>
@@ -98,6 +126,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     marginTop: -30,
+    paddingTop: 42,
     paddingVertical: 24,
     paddingHorizontal: 32,
     justifyContent: "flex-start",
@@ -123,10 +152,11 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   orSection: {
-    flex: 1,
+    height: 60,
     width: "100%",
     flexDirection: "row",
-    alignItems: "center"
+    alignItems: "center",
+    marginTop: 10,
   },
   divider: {
     height: 1,
@@ -138,10 +168,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#FFFFFF",
   },
+  footerSection: {
+    marginBottom: 60,
+    width: "100%",
+    flexDirection: "column",
+    justifyContent: "flex-end",
+    alignItems: "flex-end",
+  },
   socialButtons: {
     flex: 1,
     width: "100%",
     flexDirection: "row",
     gap: 16,
+  },
+  bottomSection: {
+    flex: 1,
+    width: "100%",
   },
 });
