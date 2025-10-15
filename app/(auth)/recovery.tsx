@@ -1,9 +1,10 @@
-import { Text, View } from "react-native";
+import { Screen } from "@/components/ui/screen";
+import { Txt } from "@/components/ui/text";
 
 export default function RecoveryScreen() {
   return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <Text>Forgot Password</Text>
-    </View>
+    <Screen>
+      <Txt text="Forgot Password"/>
+    </Screen>
   );
 }

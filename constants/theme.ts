@@ -11,8 +11,10 @@ const tintColorDark = '#fff';
 
 export const Colors = {
   light: {
-    primaryGradient: ["#4c6ef5", "#5a1ea3ff"] as [ColorValue, ColorValue],
+    primaryGradient: ["#4c6ef5", "#5a1ea3ff"] as [ColorValue, ColorValue, ...ColorValue[]],
+    duotoneBackground: "#ECECFC",
     text: '#11181C',
+    text70: '#333',
     textContrast: '#000',
     background: '#fff',
     screenBackground: "#FFF",
@@ -23,8 +25,10 @@ export const Colors = {
     white70: '#ffffff70',
   },
   dark: {
-    primaryGradient: ["#4c6ef5", "#5a1ea3ff"],
+    primaryGradient: ["#4c6ef5", "#5a1ea3ff"] as [ColorValue, ColorValue, ...ColorValue[]],
+    duotoneBackground: "#18182f",
     text: '#ECEDEE',
+    text70: '#888',
     textContrast: '#FFF',
     background: '#151718',
     screenBackground: "#151718",
@@ -39,7 +43,7 @@ export const Colors = {
 export const Fonts = Platform.select({
   ios: {
     /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
+    sans: 'Poppins_400Regular, system-ui',
     /** iOS `UIFontDescriptorSystemDesignSerif` */
     serif: 'ui-serif',
     /** iOS `UIFontDescriptorSystemDesignRounded` */
@@ -48,13 +52,13 @@ export const Fonts = Platform.select({
     mono: 'ui-monospace',
   },
   default: {
-    sans: 'normal',
+    sans: 'Poppins_400Regular, normal',
     serif: 'serif',
     rounded: 'normal',
     mono: 'monospace',
   },
   web: {
-    sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+    sans: "Poppins_400Regular, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
     serif: "Georgia, 'Times New Roman', serif",
     rounded: "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
     mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",

@@ -1,5 +1,5 @@
 import { StyleProp, StyleSheet, TouchableOpacity } from "react-native";
-import { ThemedText } from "../themed-text";
+import { Txt } from "../ui/text";
 
 type LinkButtonProps = {
   text: string,
@@ -15,7 +15,7 @@ export default function LinkButton(props: LinkButtonProps) {
       activeOpacity={0.9} 
       style={[style.linkTouch, props.style]}
      >
-      <ThemedText style={{ textAlign: props.textAlign }}>{props.text}</ThemedText>
+      <Txt style={{ textAlign: props.textAlign }} text={props.text} />
     </TouchableOpacity>
   )
 }

@@ -26,7 +26,7 @@ export default function WelcomeScreen() {
         <Text style={{ color: colors.text }}>Welcome 1</Text>
         <Text>Welcome 1</Text>
         <Text>Welcome 1</Text>
-        <ActionButton text="Fazer Login" onPress={() => router.push("/(auth)/login")}/>
+        <ActionButton text="Fazer Login" onPress={() => router.push("/(auth)/login")} duotone/>
         <ActionButton text="Criar Conta" onPress={() => router.push("/(auth)/register")}/>
       </Body>
     </Screen>

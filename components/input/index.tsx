@@ -1,63 +1,101 @@
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { useState } from "react";
-import { Control, Controller } from "react-hook-form";
-import { StyleProp, TextInput, TouchableOpacity, View } from "react-native";
+import { useTheme } from "@react-navigation/native";
+import { useEffect, useRef, useState } from "react";
+import { Control, Controller, Noop } from "react-hook-form";
+import { Animated, StyleProp, TextInput, TouchableOpacity, View } from "react-native";
 import { styles } from "./styles";
+
+const ActiveTop = 10;
+const InactiveTop = 23;
 
 export const InputText = ({ control, rules, name, label, style }: Props) => {
   const [hidePassword, setHidePassword] = useState<boolean>(true);
+  const [isFocused, setIsFocused] = useState<boolean>(false);
 
-  if (rules.isPassword) {
-    return (
-      <View style={styles.containerPasswrod}>
-        <Controller
-          control={control}
-          rules={{ required: rules.required }}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              placeholder={label}
-              placeholderTextColor={"#ffffff70"}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-              style={[style, styles.input]}
-              secureTextEntry={hidePassword}
-              keyboardType={getKeyBoardType(rules)}
-            />
-          )}
-          name={name}
-        />
-        <TouchableOpacity onPress={() => setHidePassword(!hidePassword)}>
-          {hidePassword && <AntDesign name="eye" size={20}  color={'#FFFFFF60'}/>}
-          {!hidePassword && <AntDesign name="eye-invisible" size={20}  color={'#FFFFFF60'}/>}
-        </TouchableOpacity>
-      </View>
-    );
+  const [initialLabel, setInitialLabel] = useState<number>(InactiveTop);
+
+  const [fontStart, setFontStart] = useState<number>(16);
+  const [fontFinal, setFontFinal] = useState<number>(12);
+
+  const theme = useTheme();
+  const animatedFocus = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(animatedFocus, {
+      toValue: isFocused ? 1 : 0,
+      duration: 180,
+      useNativeDriver: false,
+    }).start();
+  }, [isFocused]);
+
+
+  const AnimatedStyle = {
+    top: animatedFocus.interpolate({
+      inputRange: [0, 1],
+      outputRange: [initialLabel, ActiveTop],
+    }),
+    fontSize: animatedFocus.interpolate({
+      inputRange: [0, 1],
+      outputRange: [fontStart, fontFinal],
+    }),
+    color: animatedFocus.interpolate({
+      inputRange: [0, 1],
+      outputRange: [theme.colors.text70, theme.colors.primary],
+    }),
+  }
+
+  const handleOnBlur = (action: Noop, value: string) => {
+    console.log("Temvalor", !!value);
+
+    if(!!value) { 
+      setInitialLabel(ActiveTop);
+      setFontStart(12);
+      setFontFinal(12);
+    }
+
+    else {
+      setInitialLabel(InactiveTop);
+      setFontStart(16);
+      setFontFinal(12);
+    }
+
+    setIsFocused(false);
+    action();
   }
 
   return (
     <View style={styles.container}>
+      <Animated.Text 
+      style={[AnimatedStyle, styles.label]} 
+      pointerEvents="none"
+      >{label}</Animated.Text>
       <Controller
         control={control}
         rules={{ required: rules.required }}
         render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
-            placeholder={label}
-            placeholderTextColor={"#ffffff70"}
-            autoCapitalize="none"
-            onBlur={onBlur}
+            onBlur={() => handleOnBlur(onBlur, value)}
+            onFocus={() => setIsFocused(true)}
             onChangeText={onChange}
             value={value}
             style={[style, styles.input]}
-            secureTextEntry={false}
+            secureTextEntry={hidePassword && rules.isPassword}
             keyboardType={getKeyBoardType(rules)}
+            aria-label={label}
           />
         )}
         name={name}
       />
+      {rules.isPassword && (
+        <TouchableOpacity onPress={() => setHidePassword(!hidePassword)}>
+          {hidePassword && <AntDesign name="eye" size={20}  color={'#FFFFFF60'}/>}
+          {!hidePassword && <AntDesign name="eye-invisible" size={20}  color={'#FFFFFF60'}/>}
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
+
 
 const getKeyBoardType = (rules: Settings) => {
   if (rules.isEmail) return "email-address";

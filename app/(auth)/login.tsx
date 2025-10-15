@@ -2,6 +2,8 @@ import { ActionButton, BorderButton, LinkButton } from "@/components/buttons";
 import { InputText } from "@/components/input";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { Screen } from "@/components/ui/screen";
+import { Txt } from "@/components/ui/text";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -43,7 +45,7 @@ export default function LoginScreen() {
   console.log(colors);
 
   return (
-    <ThemedView style={styles.screen}>
+    <Screen>
       <LinearGradient
         colors={colors.primaryGradient}
         start={{ x: 0, y: 0 }}
@@ -55,8 +57,8 @@ export default function LoginScreen() {
       </LinearGradient>
 
       <ThemedView style={styles.loginView}>
-        <ThemedText style={styles.title}>Welcome Back!</ThemedText>
-        <ThemedText style={styles.subText}>Enter your details below</ThemedText>
+        <Txt style={styles.title} text="Welcome Back!" weight="bold"/>
+        <Txt style={styles.subText} text="Enter your details below" />
         <View style={styles.loginForm}>
           <InputText
             control={control}
@@ -106,7 +108,7 @@ export default function LoginScreen() {
           </View>
         </View>
       </ThemedView>
-    </ThemedView>
+    </Screen>
   );
 }
 
@@ -151,6 +153,7 @@ const styles = StyleSheet.create({
   subText: {
     fontSize: 14,
     color: "#ffffff70",
+    marginTop: 6,
     marginBottom: 12,
   },
   loginForm: {
@@ -175,7 +178,7 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
   },
   footerSection: {
-    marginBottom: 60,
+    marginBottom: 0,
     width: "100%",
     flexDirection: "column",
     justifyContent: "flex-end",
