@@ -3,17 +3,16 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Fonts } from "@/constants/theme";
-import { AuthContext } from "@/lib/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "expo-router";
-import { useContext } from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
 
 export default function HomeScreen() {
-  const authState = useContext(AuthContext);
+  const { signOut, user } = useAuth();
   const router = useRouter();
 
   const goToProfile = () => {
-    router.push("/profile");
+    router.push("/(protected)/profile");
   }
 
   return (
@@ -38,9 +37,10 @@ export default function HomeScreen() {
           HOME!
         </ThemedText>
       </ThemedView>
-      <ThemedText>Logged In {authState.isLoggedIn && "LOGADO"}.</ThemedText>
+      <ThemedText>Olá {user?.name}.</ThemedText>
+      <ThemedText>{user?.email}.</ThemedText>
 
-      <TouchableOpacity onPress={() => authState.logOut()} style={styles.button}>
+      <TouchableOpacity onPress={() => signOut()} style={styles.button}>
         <ThemedText>Sign Out</ThemedText>
       </TouchableOpacity>
 

@@ -1,33 +1,32 @@
-import { AuthContext } from "@/lib/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { Redirect, Stack } from "expo-router";
-import { useContext } from "react";
+import { ActivityIndicator } from "react-native";
 
 export default function ProtectedLayout() {
-  const authState = useContext(AuthContext);
+  const { isLoggedIn, isReady } = useAuth();
 
-  if (!authState.isReady) {
-    console.log("Auth state not ready yet");
-    return null;
+  if(!isReady) {
+    return <ActivityIndicator size="large" style={{ flex: 1, justifyContent: "center", alignItems: "center" }} />;
   }
 
-  if (!authState.isLoggedIn) {
-    console.log("User not logged in, redirecting to welcome");
-    return <Redirect href="/welcome" />;
+  if(!isLoggedIn) {
+    console.log("User not logged in, redirecting to login screen");
+    return <Redirect href="/(auth)/welcome" />;
   }
 
   return (
-    <Stack>
+    <Stack screenOptions={{headerShown: false}}>
       <Stack.Screen
         name="(tabs)"
-        options={{
-          headerShown: false,
-        }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="profile"
-        options={{
-          headerShown: false,
-        }}
+        name="profile/index"
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="wishlist/[id]"
+        options={{ headerShown: false }}
       />
     </Stack>
   );

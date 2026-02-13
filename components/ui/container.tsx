@@ -11,39 +11,32 @@ interface ContainerProps {
   justify?: ViewStyle['justifyContent'];
   align?: ViewStyle['alignItems'];
   style?: StyleProp<ViewStyle>;
+  flex?: number;
+  gap?: number;
+  stretch?: boolean; // 👈 ocupa 100% da largura
 }
 
-export const Column = styled.View<ContainerProps>`
-  flex: ${({ height }) => (height ? "0" : "1")};
-  flex-direction: ${({ isReverse }) => (isReverse ? "column-reverse" : "column")};
-  width: ${({ width }) => width ?? "100%"};
-  height: ${({ height }) => height ?? "auto"};
-  justify-content: ${props => !!props.justify ? props.justify : "center"};
-  align-items: ${props => !!props.align ? props.align : "center"};
+const BaseContainer = styled.View<ContainerProps>`
+  flex-direction: ${({ type, isReverse }) =>
+    type === "row"
+      ? isReverse ? "row-reverse" : "row"
+      : isReverse ? "column-reverse" : "column"};
+
+  ${({ flex }) => flex ? `flex: ${flex};` : ""}
+  ${({ width }) => width ? `width: ${typeof width === 'number' ? `${width}px` : width};` : ""}
+  ${({ height }) => height ? `height: ${typeof height === 'number' ? `${height}px` : height};` : ""}
+
+  ${({ stretch }) => stretch ? `width: 100%;` : ""}
+
+  justify-content: ${({ justify }) => justify ?? "center"};
+  align-items: ${({ align }) => align ?? "center"};
+  gap: ${({ gap }) => gap ?? 0};
 `;
 
-export const Row = styled.View<ContainerProps>`
-  flex: ${({ width }) => (width ? "0" : "1")};
-  flex-direction: ${({ isReverse }) => isReverse ? "row-reverse" : "row"};
-  width: ${({ width }) => width ?? "auto"};
-  height: ${({ height }) => height ?? "100%"};
-  justify-content: ${props => !!props.justify ? props.justify : "center"};
-  align-items: ${props => !!props.align ? props.align : "center"};
-`;
-
-export const Container = (props: ContainerProps) => {
-
-  if(props.type === "column") return (
-    <Column {...props}>
-      {props.children}
-    </Column>
-  );
-
+export const Container = ({ type, children, ...props }: ContainerProps) => {
   return (
-    <Row {...props}>
-      {props.children}
-    </Row>
+    <BaseContainer type={type} {...props}>
+      {children}
+    </BaseContainer>
   );
-
-
-}
+};

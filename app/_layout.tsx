@@ -1,14 +1,13 @@
 import { CustomDarkTheme, CustomDefaultTheme } from "@/constants/theme";
+import { AuthProvider } from "@/context/AuthContext";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { AuthProvider } from "@/lib/AuthContext";
-import { Poppins_300Light, Poppins_400Regular, Poppins_700Bold, useFonts } from "@expo-google-fonts/poppins";
+import { Poppins_300Light, Poppins_400Regular, Poppins_600SemiBold, Poppins_700Bold, useFonts } from "@expo-google-fonts/poppins";
 import { ThemeProvider } from "@react-navigation/native";
-import { SplashScreen, Stack } from "expo-router";
+import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ThemeProvider as StyledThemeProvider } from "styled-components/native";
-
-SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -17,22 +16,25 @@ export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     Poppins_300Light,
     Poppins_400Regular,
+    Poppins_600SemiBold,
     Poppins_700Bold,
   });
 
   if (!fontsLoaded) return null;
 
   return (
-    <AuthProvider>
-      <StyledThemeProvider theme={useTheme}>
-        <ThemeProvider value={useTheme}>
-          <StatusBar style="auto" />
-          <Stack>
-            <Stack.Screen name="(protected)" options={{ headerShown: false }} />
-            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          </Stack>
-        </ThemeProvider>
-      </StyledThemeProvider>
-    </AuthProvider>
+    <StyledThemeProvider theme={useTheme}>
+      <ThemeProvider value={useTheme}>
+        <AuthProvider>
+          <SafeAreaProvider>
+            <StatusBar style="auto" />
+            <Stack>
+              <Stack.Screen name="(protected)" options={{ headerShown: false }} />
+              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+            </Stack>
+          </SafeAreaProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </StyledThemeProvider>
   );
 }

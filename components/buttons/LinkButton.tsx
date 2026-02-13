@@ -3,7 +3,7 @@ import { Txt } from "../ui/text";
 
 type LinkButtonProps = {
   text: string,
-  textAlign: "auto" | "left" | "right" | "center" | "justify" | undefined,
+  textAlign?: "auto" | "left" | "right" | "center" | "justify" | undefined,
   style?: StyleProp<any>;
   onPress: () => void,
 }
@@ -15,7 +15,7 @@ export default function LinkButton(props: LinkButtonProps) {
       activeOpacity={0.9} 
       style={[style.linkTouch, props.style]}
      >
-      <Txt style={{ textAlign: props.textAlign }} text={props.text} />
+      <Txt style={{ textAlign: props.textAlign || "center" }} text={props.text} />
     </TouchableOpacity>
   )
 }

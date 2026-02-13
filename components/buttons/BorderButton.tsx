@@ -1,5 +1,8 @@
-import { ReactNode } from "react"
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { useTheme } from "@react-navigation/native";
+import { ReactNode } from "react";
+import { ActivityIndicator } from "react-native";
+import styled from "styled-components/native";
+import { Txt } from "../ui/text";
 
 type ButtonProps = {
   onPress: () => void,
@@ -7,52 +10,54 @@ type ButtonProps = {
   disabled?: boolean,
   loading?: boolean,
   icon?: ReactNode,
+  color?: string,
 }
 
 export default function BorderButton(props: ButtonProps) {
+  const theme = useTheme();
+
   return (
-    <TouchableOpacity 
+    <Button 
       onPress={props.onPress} 
       disabled={props.disabled || props.loading} 
-      style={styles.button}
+      activeOpacity={0.8}
     >
-        {props.loading && <ActivityIndicator color={'#fff'} />}
+        {props.loading && <ActivityIndicator color={theme.colors.text} />}
         {!props.loading && 
-        <View style={styles.iconGroup}>
+        <Group>
           {!!props.icon && props.icon}
-          <Text style={styles.buttonText}>{props.text}</Text>
-        </View>
+          <Txt 
+            text={props.text} 
+            color={props.color || theme.colors.text} 
+            size={16} 
+            weight="semi" 
+          />
+        </Group>
         }
-    </TouchableOpacity>
+    </Button>
   )
 }
 
-const styles = StyleSheet.create({
-  button: {
-    flex: 1,
-    width: "100%",
-    height: 60,
-    minHeight: 60,
-    borderRadius: 10,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#ffffff20",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "#FFF",
-    textAlign: "center",
-    fontSize: 16,
-    fontWeight: 600,
-  },
-  iconGroup: {
-    flex: 1,
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 12,
-  }
-})
+const Button = styled.TouchableOpacity`
+  flex: 1;
+  width: 100%;
+  height: 60;
+  min-height: 60;
+  border-radius: 12px;
+  overflow: hidden;
+  padding-horizontal: 12;
+  border-width: 1;
+  border-color: ${props => props.theme.colors.border};
+  justify-content: center;
+  align-items: center;
+`
+
+const Group = styled.View`
+  flex: 1;
+  width: 100%;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 10;
+`
 

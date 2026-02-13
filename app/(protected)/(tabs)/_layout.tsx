@@ -5,6 +5,7 @@ import { HapticTab } from "@/components/haptic-tab";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -35,6 +36,26 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="create"
+        options={{
+          title: "Create",
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="archive-plus" size={24} color={color} />
+          ),
+        }}
+      />
+
+      {/* ==== Tabs Ocultas do BottomTab ==== */}
+      <Tabs.Screen
+        name="wishlist/[id]"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{ href: null }}
+      />
+      {/* =================================== */}
     </Tabs>
   );
 }

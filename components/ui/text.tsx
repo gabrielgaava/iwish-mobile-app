@@ -1,14 +1,16 @@
+import { TextStyle } from "react-native";
 import styled from "styled-components/native";
 
-type TextProps = {
+type InnerTextProps = {
   text?: string;
-  weight?: 'light' | 'regular' | 'bold';
+  weight?: 'light' | 'regular' | 'bold' | 'semi';
   size?: number;
   color?: string;
-  style?: object;
+  style?: TextStyle;
+  align?: 'left' | 'center' | 'right';
 }
 
-export const Txt = (props: TextProps) => {
+export const Txt = (props: InnerTextProps) => {
 
   return (
     <StyledText
@@ -23,13 +25,19 @@ export const Txt = (props: TextProps) => {
 
 }
 
+const fontMap = {
+  light: 'Poppins_300Light',
+  regular: 'Poppins_400Regular',
+  semi: 'Poppins_600SemiBold',
+  bold: 'Poppins_700Bold',
+};
 
-const StyledText = styled.Text<TextProps>`
-    font-family: ${({ weight }) =>
-    weight === 'light' ? 'Poppins_300Light' :
-      weight === 'bold' ? 'Poppins_700Bold' : 'Poppins_400Regular'};
 
-    line-height: ${({ size }) => size || 14}px;
-    font-size: ${({ size }) => size || 14}px;
-    color: ${({ color, theme }) => color || theme.colors.text};
+const StyledText = styled.Text<InnerTextProps>`
+  font-family: ${({ weight = 'regular' }) => fontMap[weight]};
+  margin: 0;
+  padding: 0;
+  font-size: ${({ size }) => size || 14}px;
+  color: ${({ color, theme }) => color || theme.colors.text};
+  text-align: ${({ align }) => align || "center"};
 `;
