@@ -12,7 +12,7 @@ export default function HomeScreen() {
   const router = useRouter();
 
   const goToProfile = () => {
-    router.push("/(protected)/profile");
+    router.push("/profile");
   }
 
   return (

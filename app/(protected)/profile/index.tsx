@@ -16,7 +16,7 @@ export default function ProfileScreen() {
 
   async function refreshProfileData() {
     setIsFetching(true);
-    const response = await api.get<User>("/user/me")
+    const response = await api.get<User>("/users/me")
     
     if(response.status !== 200) {
       console.log("Error Retrive User", response.data);

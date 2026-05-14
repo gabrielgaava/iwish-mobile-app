@@ -15,19 +15,6 @@ export default function ProtectedLayout() {
   }
 
   return (
-    <Stack screenOptions={{headerShown: false}}>
-      <Stack.Screen
-        name="(tabs)"
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="profile/index"
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="wishlist/[id]"
-        options={{ headerShown: false }}
-      />
-    </Stack>
+    <Stack screenOptions={{ headerShown: false }} />
   );
 }

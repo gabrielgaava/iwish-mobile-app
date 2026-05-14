@@ -18,6 +18,7 @@ export const Txt = (props: InnerTextProps) => {
       size={props.size}
       color={props.color}
       style={props.style}
+      align={props.align}
     >
       {props.text}
     </StyledText>
@@ -26,12 +27,11 @@ export const Txt = (props: InnerTextProps) => {
 }
 
 const fontMap = {
-  light: 'Poppins_300Light',
-  regular: 'Poppins_400Regular',
-  semi: 'Poppins_600SemiBold',
-  bold: 'Poppins_700Bold',
+  light: 'PlusJakartaSans_300Light',
+  regular: 'PlusJakartaSans_400Regular',
+  semi: 'PlusJakartaSans_500Medium',
+  bold: 'PlusJakartaSans_700Bold',
 };
-
 
 const StyledText = styled.Text<InnerTextProps>`
   font-family: ${({ weight = 'regular' }) => fontMap[weight]};

@@ -1,7 +1,7 @@
 import { default as axios, AxiosError, AxiosInstance, AxiosResponse } from "axios";
 
 const AUTH_PREFIX = "Bearer ";
-const BASE_URL = "https://9dae-179-102-47-97.ngrok-free.app";
+const BASE_URL = "https://e777-179-93-56-115.ngrok-free.app";
 
 export type ApiSuccess<T> = T;
 

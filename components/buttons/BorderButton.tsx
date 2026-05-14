@@ -11,6 +11,7 @@ type ButtonProps = {
   loading?: boolean,
   icon?: ReactNode,
   color?: string,
+  weight?: "regular" | "semi" | "bold",
 }
 
 export default function BorderButton(props: ButtonProps) {
@@ -30,7 +31,7 @@ export default function BorderButton(props: ButtonProps) {
             text={props.text} 
             color={props.color || theme.colors.text} 
             size={16} 
-            weight="semi" 
+            weight={props.weight || "semi"} 
           />
         </Group>
         }

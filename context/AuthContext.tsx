@@ -90,7 +90,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }
 
   async function getUser(): Promise<AuthUser> {
-    const response = await api.get<AuthUser>("/user/me")
+    const response = await api.get<AuthUser>("/users/me")
 
     if(response.status !== 200) {
       console.log("Error Retrive User", response.data);
@@ -129,7 +129,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
       if(state?.accessToken) {
         setApiAuthorization(state.accessToken);
-        const response = await api.get("/user/me");
+        const response = await api.get("/users/me");
 
         if(response.status >= 300) {
           if (response.data.code === "TOKEN_EXPIRED") {

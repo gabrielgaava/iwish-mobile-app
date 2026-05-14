@@ -13,7 +13,9 @@
       "bundleIdentifier": "com.codifica.iwish",
       "supportsTablet": true,
       "entitlements": {
-        "com.apple.developer.applesignin": ["Default"]
+        "com.apple.developer.applesignin": [
+          "Default"
+        ]
       },
       "infoPlist": {
         "CFBundleLocalizations": [
@@ -79,7 +81,8 @@
         {
           "photosPermission": "The app accesses your photos to let you create cover images."
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,

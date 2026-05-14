@@ -2,7 +2,6 @@ import { Tabs } from "expo-router";
 import React from "react";
 
 import { HapticTab } from "@/components/haptic-tab";
-import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
@@ -12,6 +11,7 @@ export default function TabLayout() {
 
   return (
     <Tabs
+      backBehavior="order"
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         headerShown: false,
@@ -19,11 +19,11 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="(home)"
         options={{
           title: "Home",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
+            <MaterialCommunityIcons size={28} name="home" color={color} />
           ),
         }}
       />
@@ -32,7 +32,7 @@ export default function TabLayout() {
         options={{
           title: "Explore",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
+            <MaterialCommunityIcons size={28} name="play-box-lock" color={color} />
           ),
         }}
       />
@@ -46,7 +46,7 @@ export default function TabLayout() {
         }}
       />
 
-      {/* ==== Tabs Ocultas do BottomTab ==== */}
+      {/* ==== Tabs Ocultas do BottomTab ====
       <Tabs.Screen
         name="wishlist/[id]"
         options={{ href: null }}
@@ -55,7 +55,7 @@ export default function TabLayout() {
         name="profile"
         options={{ href: null }}
       />
-      {/* =================================== */}
+      =================================== */}
     </Tabs>
   );
 }

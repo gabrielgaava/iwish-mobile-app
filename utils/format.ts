@@ -9,8 +9,8 @@ const DEFAULT_MIME: ImageMime = "image/jpeg";
 export function normalizeImageUri(
   input?: string | null,
   mime: ImageMime = DEFAULT_MIME
-): string | undefined {
-  if (!input) return undefined;
+): string {
+  if (!input) return "";
 
   const value = input.trim();
 
@@ -38,5 +38,5 @@ export function normalizeImageUri(
   }
 
   // 5️⃣ Não reconhecido
-  return undefined;
+  return "";
 }
