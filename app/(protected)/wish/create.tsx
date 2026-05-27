@@ -1,5 +1,6 @@
 import { ActionButton, CustomButton, LinkButton } from "@/components/buttons";
 import { InputText } from "@/components/input";
+import BackHeader from "@/components/ui/back-header";
 import { Txt } from "@/components/ui/text";
 import { WishFormData, WishReviewForm } from "@/components/wish/WishReviewForm";
 import { WishlistSelectCard } from "@/components/wishlist-select-card";
@@ -127,6 +128,18 @@ export default function CreateWishPage() {
     router.push("/(protected)/wishlist/create");
   }
 
+  function handleBack() {
+    if(currentStep === "review") {
+      return setCurrentStep("link");
+    }
+
+    if(currentStep === "select-list"){
+      return setCurrentStep("review");
+    }
+
+    return router.back();
+  }
+
   async function createWish(data: FormData, targetWishlistId: string) {
     setIsRequesting(true);
     const response = await api.post(`/wishlist/${targetWishlistId}/wish`, {
@@ -157,6 +170,7 @@ export default function CreateWishPage() {
         keyboardShouldPersistTaps="handled"
       >
         <ContentContainer>
+          <BackHeader onBack={handleBack}/>
           {currentStep === "link" && (
             <LinkStep
               control={control}

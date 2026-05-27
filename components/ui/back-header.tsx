@@ -5,7 +5,7 @@ import { TouchableOpacity } from "react-native";
 import styled from "styled-components/native";
 
 type BackHeaderProps = {
-  onBack?: () => {};
+  onBack?: () => void;
 }
 
 export default function BackHeader({ onBack }: BackHeaderProps) {
