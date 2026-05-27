@@ -1,92 +1,55 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Text, View } from "react-native";
+import { Txt } from "@/components/ui/text";
+import { useTheme } from "@react-navigation/native";
+import { useEffect, useRef, useState } from "react";
 
-type CountdownTimerProps = {
-  minutes?: number; // duração em minutos, aceita decimais
-  endTime?: Date;   // horário de término
-  onFinish?: () => void; // callback ao finalizar
+type Props = {
+  minutes?: number;
+  endTime?: Date;
+  onFinish?: () => void;
 };
 
-export const CountdownTimer: React.FC<CountdownTimerProps> = ({
-  minutes,
-  endTime,
-  onFinish,
-}) => {
-  const [timeLeft, setTimeLeft] = useState<number | null>(null);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const hasFinished = useRef(false);
+/**
+ * Renderiza apenas o tempo formatado (mm:ss) como Txt inline.
+ * O intervalo é criado uma única vez — sem recriação a cada tick.
+ */
+export const CountdownTimer = ({ minutes, endTime, onFinish }: Props) => {
+  const [timeLeft, setTimeLeft] = useState(0);
+  const { colors } = useTheme();
 
-  // calcula o tempo inicial
+  // Ref para onFinish: permite alterar o callback sem reiniciar o timer
+  const onFinishRef = useRef(onFinish);
+  useEffect(() => { onFinishRef.current = onFinish; });
+
   useEffect(() => {
-    let initialSeconds = 0;
-
-    if (endTime) {
-      initialSeconds = Math.max(
-        0,
-        Math.floor((endTime.getTime() - Date.now()) / 1000)
-      );
-    } else if (minutes) {
-      initialSeconds = Math.max(1, Math.ceil(minutes * 60)); // garante pelo menos 1s
-    }
+    const initialSeconds = endTime
+      ? Math.max(0, Math.floor((endTime.getTime() - Date.now()) / 1000))
+      : Math.max(0, Math.ceil((minutes ?? 0) * 60));
 
     setTimeLeft(initialSeconds);
-  }, [endTime, minutes]);
 
-  // controla o countdown
-  useEffect(() => {
-    if (timeLeft === null || timeLeft <= 0) return;
+    if (initialSeconds <= 0) {
+      onFinishRef.current?.();
+      return;
+    }
 
-    intervalRef.current = setInterval(() => {
+    // Intervalo criado uma única vez — não recria a cada mudança de timeLeft
+    const id = setInterval(() => {
       setTimeLeft((prev) => {
-        if (prev === null) return null;
-
         if (prev <= 1) {
-          clearInterval(intervalRef.current!);
-          if (!hasFinished.current) {
-            hasFinished.current = true;
-            onFinish?.();
-          }
+          clearInterval(id);
+          // setTimeout evita chamar setState dentro de outro setState
+          setTimeout(() => onFinishRef.current?.(), 0);
           return 0;
         }
-
         return prev - 1;
       });
     }, 1000);
 
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [timeLeft]);
+    return () => clearInterval(id);
+  }, [minutes, endTime]); // só reinicia se os props mudarem
 
-  useEffect(() => {
-    return () => {
-      if(intervalRef.current)
-        clearInterval(intervalRef?.current);
-    }
-  }, [])
+  const mm = Math.floor(timeLeft / 60).toString().padStart(2, "0");
+  const ss = (timeLeft % 60).toString().padStart(2, "0");
 
-  // formata o tempo em hh:mm:ss ou mm:ss
-  const formatTime = (time: number) => {
-    const h = Math.floor(time / 3600);
-    const m = Math.floor((time % 3600) / 60);
-    const s = time % 60;
-
-    if (h > 0) {
-      return `${h}:${m.toString().padStart(2, "0")}:${s
-        .toString()
-        .padStart(2, "0")}`;
-    }
-
-    return `${m}:${s.toString().padStart(2, "0")}`;
-  };
-
-  if (timeLeft === null) return <Text>Carregando...</Text>;
-
-  return (
-    <View style={{ alignItems: "center", justifyContent: "center" }}>
-      <Text style={{ fontSize: 40, fontWeight: "bold" }}>
-        {formatTime(timeLeft)}
-      </Text>
-    </View>
-  );
+  return <Txt text={`${mm}:${ss}`} color={colors.primary} weight="semi" size={14} />;
 };

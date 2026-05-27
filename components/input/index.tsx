@@ -1,114 +1,207 @@
+import i18n from "@/constants/region";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import Feather from "@expo/vector-icons/Feather";
 import { useTheme } from "@react-navigation/native";
-import { useEffect, useRef, useState } from "react";
-import { Control, Controller, Noop } from "react-hook-form";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Control, Controller, useFormState } from "react-hook-form";
 import { Animated, StyleProp, TouchableOpacity } from "react-native";
-import { StyledContainer, StyledInput, styles } from "./styles";
+import {
+  StyledContainer,
+  StyledErrorText,
+  StyledInput,
+  StyledWrapper,
+  styles,
+} from "./styles";
 
-const ActiveTop = 10;
-const InactiveTop = 23;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export const InputText = ({ control, rules, name, label, style }: Props) => {
-  const [hidePassword, setHidePassword] = useState<boolean>(true);
-  const [isFocused, setIsFocused] = useState<boolean>(false);
-
-  const [initialLabel, setInitialLabel] = useState<number>(InactiveTop);
-
-  const [fontStart, setFontStart] = useState<number>(16);
-  const [fontFinal, setFontFinal] = useState<number>(12);
+export const InputText = ({
+  control,
+  rules,
+  name,
+  label,
+  style,
+  error,
+  disabled,
+  leftIcon,
+}: Props) => {
+  const [hidePassword, setHidePassword] = useState(true);
+  const [isFocused, setIsFocused] = useState(false);
+  const [hasValue, setHasValue] = useState(false);
 
   const theme = useTheme();
-  const animatedFocus = useRef(new Animated.Value(0)).current;
-  const animatedContainer = useRef(new Animated.Value(0)).current;
+  const { errors } = useFormState({ control, name });
+
+  // Refs para callbacks estáveis — evita criar novas arrow functions a cada render
+  const onChangeRef = useRef<(text: string) => void>(() => {});
+  const onBlurRef = useRef<() => void>(() => {});
+  // Ref espelho de hasValue para evitar setState desnecessário na comparação
+  const hasValueRef = useRef(false);
+
+  const fieldError = errors[name]?.message as string | undefined;
+  const displayError = error ?? fieldError;
+  const hasError = !!displayError;
+  const isDisabled = !!(disabled ?? rules.disabled);
+  const isFilled = hasValue && !isFocused && !hasError && !isDisabled;
+
+  // Criado uma única vez — sem nova interpolação a cada render
+  const animatedShadow = useRef(new Animated.Value(0)).current;
+  const shadowOpacity = useRef(
+    animatedShadow.interpolate({ inputRange: [0, 1], outputRange: [0, 0.15] })
+  ).current;
 
   useEffect(() => {
-    Animated.timing(animatedFocus, {
+    Animated.timing(animatedShadow, {
       toValue: isFocused ? 1 : 0,
       duration: 180,
       useNativeDriver: false,
     }).start();
-    Animated.timing(animatedContainer, {
-      toValue: isFocused ? 1 : 0,
-      duration: 180,
-      useNativeDriver: false,
-    }).start();
-  }, [isFocused]);
+  }, [animatedShadow, isFocused]);
 
+  const borderColor = useMemo(() => {
+    if (hasError) return theme.colors.errorText;
+    if (isFocused) return theme.colors.primary;
+    return theme.colors.border;
+  }, [hasError, isFocused, theme.colors.errorText, theme.colors.primary, theme.colors.border]);
 
-  const AnimatedStyle = {
-    top: animatedFocus.interpolate({
-      inputRange: [0, 1],
-      outputRange: [initialLabel, ActiveTop],
-    }),
-    fontSize: animatedFocus.interpolate({
-      inputRange: [0, 1],
-      outputRange: [fontStart, fontFinal],
-    }),
-    color: animatedFocus.interpolate({
-      inputRange: [0, 1],
-      outputRange: [theme.colors.text70, theme.colors.primary],
-    }),
-  }
+  const containerStyle = useMemo(() => ({
+    borderColor,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: isFocused ? shadowOpacity : 0,
+    shadowRadius: 8,
+    elevation: isFocused ? 3 : 0,
+  }), [borderColor, isFocused, shadowOpacity, theme.colors.primary]);
 
-  const AnimatedView = {
-    borderColor: animatedContainer.interpolate({
-      inputRange: [0, 1],
-      outputRange: [theme.colors.border, theme.colors.primary],
+  const controllerRules = useMemo(() => ({
+    required: rules.required ? i18n.t("required") : false,
+    ...(rules.isEmail && {
+      pattern: { value: EMAIL_REGEX, message: i18n.t("invalidEmail") },
     }),
-  }
+    ...(rules.minLength && {
+      minLength: {
+        value: rules.minLength,
+        message: `${i18n.t("min")} ${rules.minLength} ${i18n.t("characters")}`,
+      },
+    }),
+    ...(rules.maxLength && {
+      maxLength: {
+        value: rules.maxLength,
+        message: `${i18n.t("max")} ${rules.maxLength} ${i18n.t("characters")}`,
+      },
+    }),
+    ...(rules.validate && { validate: rules.validate }),
+  }), [rules.required, rules.isEmail, rules.minLength, rules.maxLength, rules.validate]);
 
-  const handleOnBlur = (action: Noop, value: string) => {
-    if(!!value) { 
-      setInitialLabel(ActiveTop);
-      setFontStart(12);
-      setFontFinal(12);
+  // Atualiza hasValue apenas na transição vazio ↔ preenchido, não a cada caractere
+  const handleChangeText = useCallback((text: string) => {
+    onChangeRef.current(text);
+    const next = text.length > 0;
+    if (next !== hasValueRef.current) {
+      hasValueRef.current = next;
+      setHasValue(next);
     }
+  }, []);
 
-    else {
-      setInitialLabel(InactiveTop);
-      setFontStart(16);
-      setFontFinal(12);
-    }
-
+  const handleBlur = useCallback(() => {
     setIsFocused(false);
-    action();
-  }
+    onBlurRef.current();
+  }, []);
+
+  const handleFocus = useCallback(() => {
+    if (!isDisabled) setIsFocused(true);
+  }, [isDisabled]);
+
+  const togglePassword = useCallback(() => setHidePassword(p => !p), []);
+
+  const leftIconEl = useMemo(() => {
+    if (rules.isPassword) {
+      return (
+        <AntDesign name="lock" size={18} color={theme.colors.text50} style={styles.iconLeft} />
+      );
+    }
+    if (leftIcon) {
+      return (
+        <Feather name={leftIcon} size={18} color={theme.colors.text50} style={styles.iconLeft} />
+      );
+    }
+    return null;
+  }, [rules.isPassword, leftIcon, theme.colors.text50]);
+
+  const rightIconEl = useMemo(() => {
+    if (isDisabled) {
+      return (
+        <AntDesign name="lock" size={18} color={theme.colors.text50} style={styles.iconRight} />
+      );
+    }
+    if (hasError && !rules.isPassword) {
+      return (
+        <AntDesign name="exclamation-circle" size={18} color={theme.colors.errorText} style={styles.iconRight} />
+      );
+    }
+    if (rules.isPassword) {
+      return (
+        <TouchableOpacity onPress={togglePassword} style={styles.iconRight}>
+          <AntDesign
+            name={hidePassword ? "eye" : "eye-invisible"}
+            size={18}
+            color={theme.colors.text50}
+          />
+        </TouchableOpacity>
+      );
+    }
+    if (isFilled) {
+      return (
+        <AntDesign name="check-circle" size={18} color={theme.colors.primary} style={styles.iconRight} />
+      );
+    }
+    return null;
+  }, [isDisabled, hasError, rules.isPassword, isFilled, hidePassword, togglePassword, theme.colors]);
 
   return (
-    <StyledContainer style={AnimatedView} isFocused={isFocused}>
-      <Animated.Text 
-      style={[AnimatedStyle, styles.label]} 
-      pointerEvents="none"
-      >{label}</Animated.Text>
-      <Controller
-        control={control}
-        name={name}
-        rules={{ required: rules.required }}
-        render={({ field: { onChange, onBlur, value } }) => (
-          <StyledInput
-            isFocused={isFocused}
-            onBlur={() => handleOnBlur(onBlur, value)}
-            onFocus={() => setIsFocused(true)}
-            onChangeText={onChange}
-            value={value}
-            style={style}
-            secureTextEntry={hidePassword && rules.isPassword}
-            keyboardType={getKeyBoardType(rules)}
-            aria-label={label}
-            autoCapitalize="none"
-          />
-        )}
-      />
-      {rules.isPassword && (
-        <TouchableOpacity onPress={() => setHidePassword(!hidePassword)}>
-          {hidePassword && <AntDesign name="eye" size={20}  color={theme.colors.text70}/>}
-          {!hidePassword && <AntDesign name="eye-invisible" size={20}  color={theme.colors.text70}/>}
-        </TouchableOpacity>
-      )}
-    </StyledContainer>
+    <StyledWrapper>
+      <StyledContainer
+        style={[containerStyle]}
+        isFocused={isFocused}
+        hasError={hasError}
+        isDisabled={isDisabled}
+      >
+        {leftIconEl}
+        <Controller
+          control={control}
+          name={name}
+          rules={controllerRules}
+          render={({ field: { onChange, onBlur, value } }) => {
+            // Sincroniza os refs com os handlers atuais do Controller
+            onChangeRef.current = onChange;
+            onBlurRef.current = onBlur;
+            return (
+              <StyledInput
+                isFocused={isFocused}
+                hasError={hasError}
+                isDisabled={isDisabled}
+                onChangeText={handleChangeText}
+                onBlur={handleBlur}
+                onFocus={handleFocus}
+                value={value}
+                style={style}
+                secureTextEntry={hidePassword && rules.isPassword}
+                keyboardType={getKeyBoardType(rules)}
+                aria-label={label}
+                autoCapitalize="none"
+                placeholder={label}
+                placeholderTextColor={theme.colors.text50}
+                editable={!isDisabled}
+              />
+            );
+          }}
+        />
+        {rightIconEl}
+      </StyledContainer>
+      {hasError && <StyledErrorText>{displayError}</StyledErrorText>}
+    </StyledWrapper>
   );
 };
-
 
 const getKeyBoardType = (rules: Settings) => {
   if (rules.isEmail) return "email-address";
@@ -123,7 +216,13 @@ type Settings = {
   isEmail?: boolean;
   isPhone?: boolean;
   isNumber?: boolean;
+  disabled?: boolean;
+  minLength?: number;
+  maxLength?: number;
+  validate?: Record<string, (value: string) => boolean | string>;
 };
+
+type FeatherIconName = React.ComponentProps<typeof Feather>["name"];
 
 type Props = {
   control: Control<any>;
@@ -132,4 +231,6 @@ type Props = {
   label: string;
   style?: StyleProp<any>;
   error?: string;
+  disabled?: boolean;
+  leftIcon?: FeatherIconName;
 };

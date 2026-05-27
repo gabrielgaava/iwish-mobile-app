@@ -10,9 +10,11 @@ type AuthState = {
   isReady: boolean;
   user: AuthUser | null;
   signIn: (email: string, password: string) => any;
+  signInWithTokens: (tokenData: AuthResponse) => Promise<void>;
   socialSignIn: (data: SocialLoginRequest) => any;
   signOut: () => void;
   getUser: () => Promise<AuthUser>;
+  updateUser: (data: Partial<AuthUser>) => void;
 };
 
 const AUTH_STORAGE_KEY = "iWishApp-AuthState";
@@ -24,6 +26,14 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [isReady, setIsReady] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
+
+  function applyAuthState(user: AuthUser, tokenData: AuthResponse) {
+    setApiAuthorization(tokenData.accessToken);
+    setUser(user);
+    setToken(tokenData.accessToken);
+    setIsLoggedIn(true);
+    setIsReady(true);
+  }
 
   // Set all data when a user is authenticated
   async function setAuthUser(user: AuthUser, tokenData: AuthResponse) {
@@ -37,9 +47,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
     await storageValue(AUTH_STORAGE_KEY, storage);
 
-    setUser(user);
-    setToken(tokenData.accessToken);
-    setIsLoggedIn(true);
+    applyAuthState(user, tokenData);
   }
 
   async function signIn(email: string, password: string) {
@@ -63,12 +71,23 @@ export function AuthProvider({ children }: PropsWithChildren) {
       return { error: null, data: response.data };
   };
 
+  /**
+   * Autentica o usuário a partir de tokens já obtidos (ex: após validação de OTP).
+   * Busca os dados do usuário, persiste a sessão e navega para a área logada.
+   */
+  async function signInWithTokens(tokenData: AuthResponse) {
+    setApiAuthorization(tokenData.accessToken);
+    const user = await getUser();
+    await setAuthUser(user, tokenData);
+    router.replace("/(protected)/(tabs)/(home)");
+  }
+
   async function signOut() {
     setIsLoggedIn(false);
     setToken(null);
     setUser(null);
     await storageValue(AUTH_STORAGE_KEY, null);
-    router.replace("/(auth)/login");
+    router.replace("/(auth)/welcome");
   };
 
   async function socialSignIn(data: SocialLoginRequest) {
@@ -86,11 +105,15 @@ export function AuthProvider({ children }: PropsWithChildren) {
     const user = await getUser();
     await setAuthUser(user, response.data);
 
-    router.replace("/(protected)/(tabs)");
+    router.replace("/(protected)/(tabs)/(home)");
+  }
+
+  function updateUser(data: Partial<AuthUser>) {
+    setUser((prev) => (prev ? { ...prev, ...data } : prev));
   }
 
   async function getUser(): Promise<AuthUser> {
-    const response = await api.get<AuthUser>("/users/me")
+    const response = await api.get("/users/me")
 
     if(response.status !== 200) {
       console.log("Error Retrive User", response.data);
@@ -117,6 +140,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }
 
   async function loadAuthState() {
+    setIsReady(false);
+
     try {
       const data = await getValueFor(AUTH_STORAGE_KEY);
       //console.log("Checking Local State", data);
@@ -143,24 +168,25 @@ export function AuthProvider({ children }: PropsWithChildren) {
           return nullState();      
         }
 
+        const latestData = await getValueFor(AUTH_STORAGE_KEY);
+        const latestState: SessionStorage = latestData ? JSON.parse(latestData) : state;
+
         const session: AuthResponse = {
-          accessToken: state.accessToken,
-          refreshToken: state.refreshToken,
-          expiration: state.expiration,
+          accessToken: latestState.accessToken,
+          refreshToken: latestState.refreshToken,
+          expiration: latestState.expiration,
         };
 
-        return setAuthUser(response.data, session);
+        return applyAuthState(response.data, session);
       }
+
+      return nullState();
     }
 
     catch (error) {
       console.log(error);
-      setIsLoggedIn(false);
+      nullState();
       alert("Error loading auth state");
-    }
-
-    finally {
-      setIsReady(true);
     }
   }
 
@@ -176,9 +202,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
       isReady,
       user,
       signIn,
+      signInWithTokens,
       signOut,
       socialSignIn,
-      getUser
+      getUser,
+      updateUser,
     }}>
       {children}
     </AuthContext.Provider>

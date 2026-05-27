@@ -1,188 +1,260 @@
-// screens/RegisterScreen.tsx  (apenas a parte relevante)
-import { ActionButton, BorderButton, LinkButton } from "@/components/buttons";
-import { GradientHeader } from "@/components/gradient-header";
+import { BorderButton, CustomButton } from "@/components/buttons";
 import { InputText } from "@/components/input";
 import { OrSection } from "@/components/or-section";
-import { Container } from "@/components/ui/container";
 import { ScrollScreen } from "@/components/ui/screen";
 import { Txt } from "@/components/ui/text";
 import { Icons } from "@/constants/icons";
+import i18n from "@/constants/region";
+import { nameRules, passwordRules, usernameRules } from "@/constants/rules";
 import { api } from "@/lib/api";
-import { LoginForm } from "@/types/Forms";
-import AntDesign from "@expo/vector-icons/AntDesign";
-import { useTheme } from "@react-navigation/native";
+import { RegisterForm } from "@/types/Forms";
+import Feather from "@expo/vector-icons/Feather";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import styled from "styled-components/native";
+import { useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { Platform, TouchableOpacity } from "react-native";
+import styled, { useTheme } from "styled-components/native";
 
 export default function RegisterScreen() {
   const router = useRouter();
   const { colors } = useTheme();
-
   const [isFetching, setIsFetching] = useState(false);
-  const [loginError, setLoginError] = useState("");
+  const [serverError, setServerError] = useState("");
 
-  const { control, handleSubmit, formState: { errors } } = useForm({
-    defaultValues: { name: "", email: "", password: "" },
+  const { control, handleSubmit } = useForm<RegisterForm>({
+    defaultValues: { name: "", username: "", email: "", password: "" },
   });
 
-  const handleSignUp = async (form: LoginForm) => {
+  const handleSignUp: SubmitHandler<RegisterForm> = async (form) => {
     setIsFetching(true);
+    setServerError("");
+
     const response = await api.post("/auth/register", form);
     console.log(response.data);
 
-    if(response.status !== 200) {
+    if (response.status !== 200) {
       setIsFetching(false);
-      return setLoginError(response.data.code);
+      return setServerError(response.data.code);
     }
 
     const otpResponse = await api.post("/auth/verification", {
       type: "email-verification",
-      email: form.email
+      email: form.email,
     });
 
-    if(otpResponse.status !== 200) {
+    if (otpResponse.status !== 200) {
       setIsFetching(false);
-      return setLoginError(response.data.code);
+      return setServerError(response.data.code);
     }
-    
+
     setIsFetching(false);
-
     return router.push({
-      pathname: "/(auth)/verify", 
-      params: { 
-        email: response.data.email,
-        type: "email-verification"
-      }
+      pathname: "/(auth)/verify",
+      params: { email: response.data.email, type: "email-verification" },
     });
-    
-  }
-
-  const goToLogin = () => {
-    router.push("/(auth)/login");
-  }
+  };
 
   return (
     <ScrollScreen>
-      <GradientHeader colors={colors.primaryGradient} height={25}>
-        <AntDesign name="shopping" size={36} color={colors.white70} />
-        <Txt text="iWish App" weight="bold" color={colors.white} size={26} style={{paddingBottom: 40}}/>
-      </GradientHeader>
+      <ScreenContent>
 
-      <Glassffect />
-      <RoundedBody type="column" stretch>
-        
-        <InnerContainer type="column" stretch align="center" justify="space-between">
-          <Container type="column" stretch>
-            <TextContainer type="column">
-              <Txt weight="bold" text="Get started free" size={24} />
-              <Txt text="Free forever. Just share your wishes!" color={colors.text70} />
-            </TextContainer>
+        {router.canGoBack() && (
+          <BackButton onPress={() => router.back()}>
+            <Feather name="arrow-left" size={22} color={colors.text} />
+          </BackButton>
+        )}
 
-            <FormContainer type="column">
-              <InputText 
-                name="name" 
-                label="Name" 
-                control={control} 
-                rules={{ required: true }} 
-              />
-              <InputText 
-                name="email" 
-                label="E-mail" 
-                control={control} 
-                rules={{ required: true, isEmail: true }} 
-              />
-              <InputText 
-                name="password" 
-                label="Password" 
-                control={control} 
-                rules={{ required: true, isPassword: true }} 
-              />
-              {!!loginError && <Txt text={loginError} color={colors.errorText}/>}
-              <ActionButton onPress={handleSubmit(handleSignUp)} text="Sign Up" loading={isFetching} />
-              <LinkButton text="Already have an account ? Sign In" onPress={() => goToLogin()} />
-            </FormContainer>
-          </Container>
+        <TitleSection>
+          <Txt
+            text={i18n.t("auth.register.title")}
+            weight="bold"
+            align="left"
+            size={28}
+            color={colors.text}
+          />
+          <Txt
+            align="left"
+            text={i18n.t("auth.register.subTitle")}
+            color={colors.text70}
+            style={{ marginTop: 4 }}
+          />
+        </TitleSection>
 
-          <SocialContainer type="column" stretch justify="flex-end">
-            <OrSection text="Or sign up with" />
-            <Row type="row" gap={12} stretch>
+        <FormSection>
+          <InputText
+            control={control}
+            name="name"
+            label={i18n.t("auth.register.fullName")}
+            rules={{ required: true, validate: nameRules }}
+            leftIcon="user"
+          />
+          <InputText
+            control={control}
+            name="username"
+            label={i18n.t("auth.register.username")}
+            rules={{ required: true, minLength: 3, validate: usernameRules }}
+            leftIcon="at-sign"
+          />
+          <InputText
+            control={control}
+            name="email"
+            label={i18n.t("auth.email")}
+            rules={{ required: true, isEmail: true }}
+            leftIcon="mail"
+          />
+          <InputText
+            control={control}
+            name="password"
+            label={i18n.t("auth.password")}
+            rules={{
+              required: true,
+              isPassword: true,
+              minLength: 8,
+              validate: passwordRules,
+            }}
+          />
+
+          {!!serverError && (
+            <Txt
+              text={i18n.t(serverError)}
+              color={colors.errorText}
+              style={{ marginBottom: 8 }}
+            />
+          )}
+
+          <ButtonWrapper>
+            <CustomButton
+              text={i18n.t("auth.register.createAccount")}
+              onPress={handleSubmit(handleSignUp)}
+              loading={isFetching}
+            />
+          </ButtonWrapper>
+        </FormSection>
+
+        <SocialSection>
+          <OrSection text={i18n.t("auth.register.orContinueWith")} />
+          <SocialRow>
+            <BorderButton
+              onPress={() => {}}
+              text="Google"
+              icon={<Image source={Icons.google} style={{ width: 20, height: 20 }} />}
+            />
+            {Platform.OS === "ios" && (
               <BorderButton
                 onPress={() => {}}
-                text="Google"
-                icon={<Image source={Icons.google} style={{ width: 20, height: 20 }} />}
+                text="Apple"
+                color={colors.text}
+                icon={<Image source={Icons.apple} style={{ width: 20, height: 20 }} />}
               />
-              <BorderButton
-                onPress={() => {}}
-                text="Facebook"
-                color="#1976d2"
-                icon={<Image source={Icons.facebook} style={{ width: 20, height: 20 }} />}
+            )}
+          </SocialRow>
+        </SocialSection>
+
+        <FooterSection>
+          <AlreadyRow>
+            <Txt
+              text={i18n.t("auth.register.alreadyHaveAccount")}
+              color={colors.text70}
+            />
+            <TouchableOpacity onPress={() => router.push("/(auth)/login")}>
+              <Txt
+                text={i18n.t("auth.register.login")}
+                color={colors.primary}
+                weight="bold"
               />
-            </Row>
-          </SocialContainer>
-        </InnerContainer>
-      </RoundedBody>
+            </TouchableOpacity>
+          </AlreadyRow>
+
+          <TermsRow>
+            <Txt
+              text={i18n.t("auth.register.termsPrefix") + " "}
+              color={colors.text50}
+              size={12}
+              style={{ textAlign: "center" }}
+            />
+            <TouchableOpacity>
+              <Txt
+                text={i18n.t("auth.register.termsLink")}
+                color={colors.text50}
+                size={12}
+                style={{ textDecorationLine: "underline" }}
+              />
+            </TouchableOpacity>
+            <Txt text={" " + i18n.t("auth.register.termsMiddle") + " "} color={colors.text50} size={12} />
+            <TouchableOpacity>
+              <Txt
+                text={i18n.t("auth.register.privacyLink")}
+                color={colors.text50}
+                size={12}
+                style={{ textDecorationLine: "underline" }}
+              />
+            </TouchableOpacity>
+            <Txt text="." color={colors.text50} size={12} />
+          </TermsRow>
+        </FooterSection>
+
+      </ScreenContent>
     </ScrollScreen>
   );
 }
 
+const ScreenContent = styled.View`
+  flex: 1;
+  padding: 0px 24px;
+`;
 
-const RoundedBody = styled(Container)`
-  width: 100%;
-  heigth: 100%;
-  border-top-left-radius: 24px;
-  border-top-right-radius: 24px;
-  margin-top: -4px;          
-  padding-top: 20px;  
-  padding-vertical: 24px;
-  padding-horizontal: 20px;
+const BackButton = styled.TouchableOpacity`
+  padding: 4px;
+  margin-bottom: 24px;
+  align-self: flex-start;
+`;
+
+const TitleSection = styled.View`
+  margin-bottom: 8px;
   justify-content: flex-start;
+  align-items: flex-start;
+`;
+
+const FormSection = styled.View`
+  width: 100%;
+`;
+
+const SocialSection = styled.View`
+  margin-top: 8px;
+`;
+
+const SocialRow = styled.View`
+  flex-direction: row;
+  gap: 12px;
+`;
+
+const FooterSection = styled.View`
+  margin-top: auto;
+  padding-top: 24px;
   align-items: center;
-  background-color: ${p => p.theme.colors.background};
-  flex-grow: 1;
-
-  shadow-color: #000;
-  shadow-offset: 0px -2px;
-  shadow-opacity: 0.1;
-  shadow-radius: 6px;
-  elevation: 6;
+  gap: 8px;
+  flex: 1;
+  justify-content: flex-end;
 `;
 
-const Glassffect = styled.View`    
-  background-color: ${p => p.theme.colors.glassBackground};
-  width: 90%;
-  height: 16px;
-  margin-top: -50px;  
-  justify-self: flex-end;
-  align-self: center;
-  border-radius: 30px 30px 0px 0px;
-`;
-
-const InnerContainer = styled(Container)`
-  width: 100%;
-  flex-grow: 1;
-  max-width: 520px; /* opcional para telas grandes */
+const AlreadyRow = styled.View`
+  flex-direction: row;
   align-items: center;
-  justify-content: flex-start;
+  gap: 6px;
 `;
 
-const TextContainer = styled(Container)`
-  width: 100%;
+const TermsRow = styled.View`
+  flex-direction: row;
+  flex-wrap: wrap;
   align-items: center;
-  margin-bottom: 12px;
+  justify-content: center;
+  padding-bottom: 12px;
 `;
 
-const FormContainer = styled(Container)`
+const ButtonWrapper = styled.View`
   width: 100%;
-  padding-bottom: 8px;
-`;
-
-const SocialContainer = styled(Container)`
-  width: 100%;
+  justify-content: center;
+  align-items: center;
   margin-top: 12px;
-  flex-grow: 1;
 `;
-
-const Row = styled(Container)` width: 100%; `;

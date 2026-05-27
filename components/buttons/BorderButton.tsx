@@ -42,12 +42,12 @@ export default function BorderButton(props: ButtonProps) {
 const Button = styled.TouchableOpacity`
   flex: 1;
   width: 100%;
-  height: 60;
-  min-height: 60;
+  height: 60px;
+  min-height: 60px;
   border-radius: 12px;
   overflow: hidden;
-  padding-horizontal: 12;
-  border-width: 1;
+  padding-horizontal: 12px;
+  border-width: 1px;
   border-color: ${props => props.theme.colors.border};
   justify-content: center;
   align-items: center;
@@ -59,6 +59,6 @@ const Group = styled.View`
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  gap: 10;
+  gap: 10px;
 `
 

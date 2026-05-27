@@ -15,6 +15,14 @@ export default function ProtectedLayout() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }} />
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(tabs)" />
+
+      {/* Rotas compartilhadas entre tabs */}
+      <Stack.Screen name="users/[userId]" options={{ title: "Perfil" }} />
+      <Stack.Screen name="wishlist/index" options={{ title: "Wishlist" }} />
+      <Stack.Screen name="wishlist/[id]" options={{ title: "Wishlist" }} />
+      <Stack.Screen name="wish/create" options={{ title: "Criar Wish" }} />
+    </Stack>
   );
 }

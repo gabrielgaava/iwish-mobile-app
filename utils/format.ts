@@ -1,3 +1,5 @@
+import i18n from "@/constants/region";
+
 type ImageMime =
   | "image/jpeg"
   | "image/png"
@@ -38,5 +40,36 @@ export function normalizeImageUri(
   }
 
   // 5️⃣ Não reconhecido
+  return "";
+}
+
+export function toPrice(value: string | number | undefined | null) {
+
+  if(value === undefined || value === null) return "";
+
+  const valueString = Number(value).toFixed(2);
+  const money = i18n.get("money");
+
+  return `${money} ${valueString}`;
+}
+
+export function getRelativeTime(date: Date): string {
+  const diffMs = Date.now() - new Date(date).getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMins < 1) return "agora";
+  if (diffMins < 60) return `há ${diffMins} min`;
+  if (diffHours < 24) return `há ${diffHours} hora${diffHours > 1 ? "s" : ""}`;
+  return `há ${diffDays} dia${diffDays > 1 ? "s" : ""}`;
+}
+
+export function limitText(text: string|undefined, size: number) {
+  if(text && text.length > 0) {
+    if(text.length <= size) return text;
+    return text.slice(0, size-3) + "... "
+  }
+
   return "";
 }

@@ -1,20 +1,19 @@
-import { ActionButton, BorderButton, LinkButton } from "@/components/buttons";
-import { GradientHeader } from "@/components/gradient-header";
+import { BorderButton, CustomButton, LinkButton } from "@/components/buttons";
 import { InputText } from "@/components/input";
+import MessageAlert from "@/components/message-alert";
 import { OrSection } from "@/components/or-section";
-import { Container } from "@/components/ui/container";
 import { ScrollScreen } from "@/components/ui/screen";
 import { Txt } from "@/components/ui/text";
 import { Icons } from "@/constants/icons";
 import i18n from "@/constants/region";
 import { useAuth } from "@/hooks/useAuth";
 import { api } from "@/lib/api";
-import AntDesign from "@expo/vector-icons/AntDesign";
+import Feather from "@expo/vector-icons/Feather";
 import { GoogleSignin, isSuccessResponse } from "@react-native-google-signin/google-signin";
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { Platform } from "react-native";
 import styled, { useTheme } from "styled-components/native";
@@ -43,7 +42,7 @@ export default function LoginScreen() {
     },
   });
 
-  const onSubmit: SubmitHandler<LoginForm> = async (formData) => {
+  const onSubmit: SubmitHandler<LoginForm> = useCallback(async (formData) => {
 
     setIsFetching(true);
     console.log(formData);
@@ -81,15 +80,18 @@ export default function LoginScreen() {
       return setError(error?.code);
     } 
     
-    return router.replace("/(protected)/(tabs)");
-
-  };
+    return router.replace("/(protected)/(tabs)/(home)");
+  }, []);
 
   const goToRecovery = () => {
     router.push({
-      pathname: "/recovery", params: {
-        email: "teste.brabo@gmail.com"
-      }
+      pathname: "/recovery", params: {}
+    });
+  }
+
+  const goToRegister = () => {
+    router.push({
+      pathname: "/register"
     });
   }
 
@@ -124,7 +126,7 @@ export default function LoginScreen() {
 
       console.log(credentials);
       socialSignIn({ provider: "apple", idToken: credentials.identityToken! });
-      router.replace("/(protected)/(tabs)")
+      router.replace("/(protected)/(tabs)/(home)")
     }
 
     catch (error) {
@@ -133,19 +135,14 @@ export default function LoginScreen() {
   }
 
   return (
-    <ScrollScreen>
-      <GradientHeader colors={colors.primaryGradient}>
-        <AntDesign name="shopping" size={36} color={colors.white70} />
-        <HeaderText text="iWish" weight="bold" color={colors.white} />
-      </GradientHeader>
-
-      <Glassffect />
-      <RoundedBody type="column" stretch>
-        <InnerContainer type="column" stretch align="center" justify="space-between">
-          <Container type="column" stretch>
-            <Txt text="Welcome Back!" weight="semi" color={colors.text} size={24} />
-            <Txt text="Enter your details below" color={colors.text70} style={{ marginBottom: 12 }} />
-          </Container>
+    <ScrollScreen indicator={false}>
+      <Body>
+        <InnerContainer>
+          <Feather name="gift" size={40} color={colors.primary} style={{marginTop: 28, marginBottom: 8}}/>
+          <Header>
+            <Txt text={i18n.get("auth.login.title")} weight="bold" color={colors.text} size={26} align="left" />
+            <Txt text={i18n.get("auth.login.subTitle")}  color={colors.text70} style={{ marginBottom: 24 }} size={16} align="left"/>
+          </Header>
 
           <FormSection>
             <InputText
@@ -153,102 +150,99 @@ export default function LoginScreen() {
               name="email"
               label="Email"
               rules={{ isEmail: true, required: true }}
+              leftIcon="mail"
             />
             <InputText
               control={control}
               name="password"
               label="Password"
-              rules={{ isPassword: true, required: true }}
+              rules={{ isPassword: true, required: true, minLength: 6 }}
             />
-            {!!error && <Txt text={i18n.t(error)} color={colors.errorText} />}
-            <ActionButton
+            <Forgot>
+               <LinkButton
+                  text="Forgot your password ?"
+                  onPress={() => goToRecovery()}
+                  textAlign="center"
+                />
+            </Forgot>
+            <CustomButton
               onPress={handleSubmit(onSubmit)}
               text="Sign in"
               loading={isFetching}
             />
-            <LinkButton
-              text="Forgot your password ?"
-              onPress={() => goToRecovery()}
-              textAlign="center"
-              style={{ marginTop: 20 }}
-            />
+            {!!error && <MessageAlert type="error" message={i18n.t(error)}/>}
           </FormSection>
 
           <FooterSection>
-            <OrSection text="Or sign in with" />
-
+            <OrSection text={i18n.t("or")} />
             <SocialButtons>
               <BorderButton
                 onPress={() => handelSocialLogin("google")}
-                text="Google"
+                text={i18n.get("auth.login.goWithGoogle")}
                 icon={<Image source={Icons.google} style={{ width: 20, height: 20 }} />}
               />
               {Platform.OS === "ios" &&
                 <BorderButton
                   onPress={() => handelSocialLogin("apple")}
-                  text="Apple"
+                  text={i18n.get("auth.login.goWithApple")}
                   color={colors.text}
                   icon={<Image source={Icons.apple} style={{ width: 20, height: 20 }} />}
-                />}
+                />
+              }
+              <LinkButton
+                text={i18n.t("auth.login.noAccount")}
+                onPress={() => goToRegister()}
+                textAlign="center"
+              />
             </SocialButtons>
           </FooterSection>
         </InnerContainer>
-      </RoundedBody>
+      </Body>
     </ScrollScreen>
   );
 }
 
-const RoundedBody = styled(Container)`
+const Header = styled.View``;
+
+const Body = styled.View`
   width: 100%;
-  border-top-left-radius: 24px;
-  border-top-right-radius: 24px;
-  margin-top: -4px;          
-  padding-top: 20px;  
-  padding-bottom: 20px;
+  flex: 1;
   padding-left: 24px;
   padding-right: 24px;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: center;
-  background-color: ${p => p.theme.colors.background};
-  flex-grow: 1;
 `;
 
-const InnerContainer = styled(Container)`
+const InnerContainer = styled.View`
   width: 100%;
-  flex-grow: 1;
-  max-width: 520px; 
-  align-items: center;
-  justify-content: flex-start;
   padding-top: 20px;
 `;
 
-const Glassffect = styled.View`    
-  background-color: ${p => p.theme.colors.glassBackground};
-  width: 90%;
-  height: 16px;
-  margin-top: -50px;  
-  justify-self: flex-end;
-  align-self: center;
-  border-radius: 30px 30px 0px 0px;
-`;
-
-const HeaderText = styled(Txt)`
-  padding-bottom: 20px;
-`;
-
 const FormSection = styled.View`
-  flex: 1;
   width: 100%;
 `;
 
 const FooterSection = styled.View`
   width: 100%;
+  flex: 1;
   flex-direction: column;
+  align-items: center;
   justify-content: flex-end;
-  align-items: flex-end;
+  margin-top: auto;
+  padding-top: 16px;
+  padding-bottom: 16px;
 `;
 
 const SocialButtons = styled.View`
-  flex-direction: row;
+  flex-direction: column;
   gap: 16px;
+  width: 100%;
+`;
+
+const Forgot = styled.View`
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-right: 6px;
 `;

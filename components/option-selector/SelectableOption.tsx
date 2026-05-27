@@ -1,4 +1,8 @@
 import { Txt } from "@/components/ui/text";
+import { FeatherIconName } from "@/types/Ui";
+import Feather from "@expo/vector-icons/Feather";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { useTheme } from "@react-navigation/native";
 import React from "react";
 import { Pressable } from "react-native";
 import styled, { css } from "styled-components/native";
@@ -7,9 +11,10 @@ type Props = {
   selected: boolean;
   title: string;
   description: string;
-  icon: React.ReactNode;
+  icon: FeatherIconName;
   onPress: () => void;
 };
+
 
 export function SelectableOption({
   selected,
@@ -18,31 +23,37 @@ export function SelectableOption({
   icon,
   onPress,
 }: Props) {
+
+  const { colors } = useTheme();
+
   return (
     <Card selected={selected} onPress={onPress}>
       <Left>
-        <IconWrapper>{icon}</IconWrapper>
+        <IconWrapper>
+          <Feather name={icon} size={20} color={selected ? colors.primary : colors.icon} />
+        </IconWrapper>
         <TextGroup>
-          <Txt text={title} weight="semi" />
-          <Description text={description} />
+          <Txt text={title} weight="semi" align="left"/>
+          <Description text={description} align="left"/>
         </TextGroup>
       </Left>
-
-      <Radio selected={selected} />
+      <RadioWrapper>
+        {!selected && <Feather name="circle" size={22} color={colors.primary}/>}
+        {selected && <Ionicons name="checkmark-circle" size={22} color={colors.primary}/>}
+      </RadioWrapper>
     </Card>
   );
 }
 
 const Card = styled(Pressable)<{ selected: boolean }>`
-  width: 100%;
-  padding: 16px;
+  padding: 16px 32px 16px 16px;
   border-radius: 14px;
   flex-direction: row;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 12px;
-
   border-width: 1px;
+  flex: 1;
 
   ${({ selected, theme }) =>
     selected
@@ -57,16 +68,15 @@ const Card = styled(Pressable)<{ selected: boolean }>`
 `;
 
 const Left = styled.View`
-  flex-direction: row;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-start;
 `;
 
 const IconWrapper = styled.View`
   width: 36px;
   height: 36px;
   border-radius: 18px;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
 `;
 
@@ -87,12 +97,16 @@ const Radio = styled.View<{ selected: boolean }>`
   border-radius: 10px;
   border-width: 1px;
   border-color: ${({ theme }) => theme.colors.primary};
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  justify-content: flex-start;
 
   ${({ selected, theme }) =>
     selected &&
     css`
       background-color: ${theme.colors.primary};
     `}
+`;
+
+const RadioWrapper = styled.View`
+  height: 100%;
 `;

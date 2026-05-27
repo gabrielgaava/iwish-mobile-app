@@ -1,93 +1,125 @@
-import { ActionButton } from "@/components/buttons";
-import { ImagePickerViewer } from "@/components/image-picker";
-import { InputText } from "@/components/input";
-import { OptionSelector } from "@/components/option-selector/OptionSelector";
 import { Txt } from "@/components/ui/text";
-import { api } from "@/lib/api";
+import i18n from "@/constants/region";
+import AntDesign from "@expo/vector-icons/AntDesign";
 import Feather from "@expo/vector-icons/Feather";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import Octicons from "@expo/vector-icons/Octicons";
 import { useTheme } from "@react-navigation/native";
-import * as ExpoImagePicker from 'expo-image-picker';
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { Alert } from "react-native";
+import { router } from "expo-router";
+import { useCallback, useMemo } from "react";
+import { View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import styled from "styled-components/native";
 
 export default function CreatePage() {
-  const [image, setImage] = useState<ExpoImagePicker.ImagePickerAsset>();
-  const [isPublic, setIsPublic] = useState<boolean>(true);
   const { colors } = useTheme();
 
-  const { control, handleSubmit } = useForm({
-      defaultValues: {
-        name: "",
-        description: "",
-      },
-  });
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.darkBackground }}>
+      <Page style={{ padding: 24, backgroundColor: colors.darkBackground }}>
+        <View style={{ marginTop: 36, marginBottom: 36, paddingHorizontal: 12 }}>
+          <Octicons name="sparkles-fill" size={36} color={colors.primary} style={{ marginBottom: 18 }}/>
+          <Txt text={i18n.t("createPage.title")} size={24} weight="bold" align="left" />
+          <Txt text={i18n.t("createPage.subtitle")} size={14} align="left" />
+        </View>
+        <View style={{ gap: 12 }}>
+          <CreateOption type="wish" />
+          <CreateOption type="wishlist" />
+          <CreateOption type="event" />
+        </View>
+      </Page>
+    </SafeAreaView>
+  );
+}
 
-  const visibilityOptions = [
-    {
-      value: "public",
-      title: "Publica",
-      description: "Qualquer pessoa pode ver sua lista.",
-      icon: <Feather name="globe" size={20} color={colors.icon} />
-    },
-    {
-      value: "private",
-      title: "Privada",
-      description: "Apenas você pode ver sua lista.",
-      icon: <Feather name="lock" size={20} color={colors.icon} />
+function CreateOption({ type }: { type: "wish" | "wishlist"| "event" }) {
+  const { colors } = useTheme();
+
+  const titleMap = useMemo(() => ({
+    wish: i18n.t("createPage.wish.title"),
+    wishlist: i18n.t("createPage.wishlist.title"),
+    event: i18n.t("createPage.event.title"),
+  }), []);
+
+  const descriptionMap = useMemo(() => ({
+    wish: i18n.t("createPage.wish.description"),
+    wishlist: i18n.t("createPage.wishlist.description"),
+    event: i18n.t("createPage.event.description"),
+  }), []);
+
+  const iconMap = useMemo(() => ({
+    wish: <AntDesign name="plus-circle" size={24} color={colors.primary} />,
+    wishlist: <Feather name="layers" size={24} color={colors.text70} />,
+    event: <Feather name="calendar" size={24} color={colors.text50} />
+  }), [colors]);
+
+  const handlePress = useCallback(() => {
+    if (type === "wish") {
+      router.push("/(protected)/wish/create");
+    } else if (type === "wishlist") {
+      router.push("/(protected)/wishlist/create");
     }
-  ];
-
-  function handleImageChange(listImages: ExpoImagePicker.ImagePickerAsset[]) {
-    console.log(listImages[0]);
-    setImage(listImages[0])
-  } 
-
-  async function createWishlist(data: any) {
-    const payload = {
-      ...data,
-      isPublic,
-      coverImage: image?.base64
-    }
-    console.log(payload);
-    const response = await api.post("/wishlist", payload);
-
-    if(response.status !== 200){
-      Alert.alert("Error on create the wishlist");
-      console.log(response.data);
-    }
-  }
+  }, [type]);
 
   return (
-    <Page style={{ padding: 24, backgroundColor: colors.background }}>
-      <FormContainer>
-        <Txt text="Create Wishlist" size={18} />
-        <ImagePickerViewer limit={1} onSelect={handleImageChange}/>
-        <InputText control={control} label="Name" name="name" rules={{required: true}} />
-        <InputText control={control} label="Description" name="description" rules={{required: true}} />
-        <OptionSelector 
-          options={visibilityOptions} 
-          onValueChange={(value: string) => setIsPublic(value === "public")} 
-        />
-      </FormContainer>
-      <ButtonContainer>
-        <ActionButton text="Criar" onPress={handleSubmit(createWishlist)}/>
-      </ButtonContainer>
-    </Page>
-  )
+    <OptionCard onPress={handlePress} activeOpacity={0.8} disabled={type === "event"}>
+      {type === "event" &&
+      <SoonBadge>
+        <Txt text={i18n.t("createPage.soonBadge")} size={12}/>
+      </SoonBadge>
+      }
+      <OptionCardRow>
+        <OptionIcon>
+          {iconMap[type]}
+        </OptionIcon>
+        <View>
+          <Txt text={titleMap[type]} align="left" weight="bold" size={16} />
+          <Txt text={descriptionMap[type]} align="left" />
+        </View>
+      </OptionCardRow>
+      <MaterialIcons name="chevron-right" size={24} color={colors.text50} />
+    </OptionCard>
+  );
 }
 
 const Page = styled.View`
   flex: 1;
   width: 100%;
-  height: 100%;
-  justify-content: space-between;
-  background: ${({theme}) => theme.colors.background};
-`
-
-const FormContainer = styled.View`
-  flex: 1;
+  background: ${({ theme }) => theme.colors.background};
 `;
 
-const ButtonContainer = styled.View``
+const OptionCard = styled.TouchableOpacity`
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background: ${props => props.theme.colors.background};
+  border: solid 1px ${props => props.theme.colors.border30};
+  border-radius: 8px;
+  height: 82px;
+  padding: 8px 16px;
+  opacity: ${p => p.disabled ? 0.4 : 1};
+`;
+
+const OptionCardRow = styled.View`
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+`;
+
+const OptionIcon = styled.View`
+  justify-content: center;
+  align-items: center;
+  background: ${props => props.theme.colors.duotoneBackground};
+  padding: 10px;
+  border-radius: 8px;
+`;
+
+export const SoonBadge = styled.View`
+  background: ${p => p.theme.colors.altBackground};
+  padding: 4px 8px;
+  border-radius: 6px;
+  position: absolute;
+  right: 0;
+  top: 0;
+`;

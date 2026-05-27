@@ -1,73 +1,204 @@
-import ParallaxScrollView from "@/components/parallax-scroll-view";
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { IconSymbol } from "@/components/ui/icon-symbol";
-import { Fonts } from "@/constants/theme";
+import { LinkButton } from "@/components/buttons";
+import { FeedItem } from "@/components/feed";
+import { Txt } from "@/components/ui/text";
+import { images } from "@/constants/images";
 import { useAuth } from "@/hooks/useAuth";
-import { useRouter } from "expo-router";
-import { StyleSheet, TouchableOpacity } from "react-native";
+import { api } from "@/lib/api";
+import { FeedResponse } from "@/types/Feed";
+import { normalizeImageUri } from "@/utils/format";
+import Feather from "@expo/vector-icons/Feather";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { useTheme } from "@react-navigation/native";
+import { Image } from "expo-image";
+import { useEffect, useState } from "react";
+import { RefreshControl, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { TabScrollView } from "@/components/ui/tab-scroll-view";
+import { SafeAreaView } from "react-native-safe-area-context";
+import styled from "styled-components/native";
 
 export default function HomeScreen() {
-  const { signOut, user } = useAuth();
-  const router = useRouter();
+  const { user } = useAuth();
+  const { colors } = useTheme();
 
-  const goToProfile = () => {
-    router.push("/profile");
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [feed, setFeed] = useState<FeedResponse | null>(null);
+  const [importLink, setImportLink] = useState("");
+
+  async function fetchFeedData() {
+    const response = await api.get("/feed");
+    if (response.status !== 200) return;
+    setFeed(response.data);
   }
 
+  async function handleRefresh() {
+    setIsRefreshing(true);
+    await fetchFeedData();
+    setIsRefreshing(false);
+  }
+
+  useEffect(() => {
+    fetchFeedData();
+  }, []);
+
+  const firstName = user?.name.split(" ")[0] ?? "";
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }
-    >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}
-        >
-          HOME!
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>Olá {user?.name}.</ThemedText>
-      <ThemedText>{user?.email}.</ThemedText>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.darkBackground }}>
+      <TabScrollView
+        style={{ backgroundColor: colors.darkBackground }}
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
+        }
+      >
+        <PageContent>
 
-      <TouchableOpacity onPress={() => signOut()} style={styles.button}>
-        <ThemedText>Sign Out</ThemedText>
-      </TouchableOpacity>
+          <HomeHeader>
+            <HeaderLeft>
+              <UserAvatar
+                source={
+                  user?.image
+                    ? normalizeImageUri(user.image)
+                    : images.avatarPlaceholder
+                }
+              />
+              <Text style={{ fontSize: 20, color: colors.text }}>
+                <Text style={{ fontFamily: "PlusJakartaSans_700Bold" }}>
+                  {"Olá, " + firstName}
+                </Text>
+                {"  👋"}
+              </Text>
+            </HeaderLeft>
+            <TouchableOpacity activeOpacity={0.7}>
+              <BellWrapper>
+                <Ionicons name="notifications-outline" size={22} color={colors.text} />
+              </BellWrapper>
+            </TouchableOpacity>
+          </HomeHeader>
 
-      <TouchableOpacity onPress={() => goToProfile()} style={styles.button}>
-        <ThemedText>Perfil</ThemedText>
-      </TouchableOpacity>
+          <ImportRow style={{ borderColor: colors.border, backgroundColor: colors.background }}>
+            <ImportInputArea>
+              <Feather name="link" size={16} color={colors.text70} />
+              <TextInput
+                value={importLink}
+                onChangeText={setImportLink}
+                placeholder="Cole o link do produto"
+                placeholderTextColor={colors.text70}
+                style={{
+                  flex: 1,
+                  fontSize: 14,
+                  color: colors.text,
+                  fontFamily: "PlusJakartaSans_400Regular",
+                }}
+              />
+            </ImportInputArea>
+            <ImportButton
+              activeOpacity={0.85}
+              onPress={() => {}}
+              style={{ backgroundColor: colors.primary }}
+            >
+              <Txt text="Importar" color={colors.white} weight="semi" size={14} />
+            </ImportButton>
+          </ImportRow>
 
+          <SectionHeader>
+            <Txt text="Atividade dos amigos" weight="bold" size={18} align="left" />
+            <LinkButton text="Ver tudo" onPress={() => {}} contrast />
+          </SectionHeader>
 
-    </ParallaxScrollView>
+          {feed?.data.length === 0 && (
+            <EmptyFeed>
+              <Ionicons name="people-outline" size={40} color={colors.text70} />
+              <Txt
+                text="Nenhuma atividade ainda."
+                size={15}
+                color={colors.text70}
+                align="center"
+              />
+              <Txt
+                text="Siga amigos para ver o que eles estão desejando."
+                size={13}
+                color={colors.text70}
+                align="center"
+              />
+            </EmptyFeed>
+          )}
+
+          <View>
+            {feed?.data.map((item) => (
+              <FeedItem key={item.id} data={item} />
+            ))}
+          </View>
+
+        </PageContent>
+      </TabScrollView>
+    </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  headerImage: {
-    color: "#808080",
-    bottom: -90,
-    left: -35,
-    position: "absolute",
-  },
-  titleContainer: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  button: {
-    marginTop: 20,
-    padding: 10,
-    backgroundColor: "#007AFF",
-    borderRadius: 5,
-  }
-});
+const PageContent = styled.View`
+  padding: 16px 20px 32px;
+  gap: 16px;
+`;
+
+const HomeHeader = styled.View`
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+const HeaderLeft = styled.View`
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+`;
+
+const UserAvatar = styled(Image)`
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+`;
+
+const BellWrapper = styled.View`
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  border-width: 1px;
+  border-color: ${({ theme }) => theme.colors.border};
+  justify-content: center;
+  align-items: center;
+`;
+
+const ImportRow = styled.View`
+  flex-direction: row;
+  align-items: center;
+  border-width: 1px;
+  border-radius: 12px;
+  padding: 6px 6px 6px 14px;
+  gap: 8px;
+`;
+
+const ImportInputArea = styled.View`
+  flex: 1;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+`;
+
+const ImportButton = styled.TouchableOpacity`
+  border-radius: 8px;
+  padding: 10px 18px;
+  justify-content: center;
+  align-items: center;
+`;
+
+const SectionHeader = styled.View`
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+const EmptyFeed = styled.View`
+  align-items: center;
+  gap: 8px;
+  padding: 40px 20px;
+`;

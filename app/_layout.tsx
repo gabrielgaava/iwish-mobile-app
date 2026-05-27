@@ -1,19 +1,43 @@
 import { CustomDarkTheme, CustomDefaultTheme } from "@/constants/theme";
 import { AuthProvider } from "@/context/AuthContext";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { ThemeContextProvider, useAppTheme } from "@/context/ThemeContext";
 import { PlusJakartaSans_300Light, PlusJakartaSans_400Regular, PlusJakartaSans_500Medium, PlusJakartaSans_700Bold } from "@expo-google-fonts/plus-jakarta-sans";
 import { useFonts } from "@expo-google-fonts/poppins";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { ThemeProvider } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ThemeProvider as StyledThemeProvider } from "styled-components/native";
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const useTheme = colorScheme === "dark" ? CustomDarkTheme : CustomDefaultTheme;
+// Componente separado para poder consumir ThemeContext
+// (ThemeContextProvider precisa estar por fora)
+function ThemedApp() {
+  const { isDarkMode } = useAppTheme();
+  const theme = isDarkMode ? CustomDarkTheme : CustomDefaultTheme;
 
+  return (
+    <StyledThemeProvider theme={theme}>
+      <ThemeProvider value={theme}>
+        <AuthProvider>
+          <SafeAreaProvider>
+            <BottomSheetModalProvider>
+              <StatusBar style={isDarkMode ? "light" : "dark"} />
+              <Stack>
+                <Stack.Screen name="(protected)" options={{ headerShown: false }} />
+                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+              </Stack>
+            </BottomSheetModalProvider>
+          </SafeAreaProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </StyledThemeProvider>
+  );
+}
+
+export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     PlusJakartaSans_300Light,
     PlusJakartaSans_400Regular,
@@ -24,18 +48,10 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <StyledThemeProvider theme={useTheme}>
-      <ThemeProvider value={useTheme}>
-        <AuthProvider>
-          <SafeAreaProvider>
-            <StatusBar style="auto" />
-            <Stack>
-              <Stack.Screen name="(protected)" options={{ headerShown: false }} />
-              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-            </Stack>
-          </SafeAreaProvider>
-        </AuthProvider>
-      </ThemeProvider>
-    </StyledThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeContextProvider>
+        <ThemedApp />
+      </ThemeContextProvider>
+    </GestureHandlerRootView>
   );
 }

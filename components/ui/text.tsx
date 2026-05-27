@@ -8,9 +8,15 @@ type InnerTextProps = {
   color?: string;
   style?: TextStyle;
   align?: 'left' | 'center' | 'right';
+  maxLength?: number;
 }
 
 export const Txt = (props: InnerTextProps) => {
+
+  const finalText = props.maxLength && props.text 
+  && props.text?.length > props.maxLength
+    ? props.text?.slice(0, props.maxLength) + "..."
+    : props.text;
 
   return (
     <StyledText
@@ -20,7 +26,7 @@ export const Txt = (props: InnerTextProps) => {
       style={props.style}
       align={props.align}
     >
-      {props.text}
+      {finalText}
     </StyledText>
   );
 

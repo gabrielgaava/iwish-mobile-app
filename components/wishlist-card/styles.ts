@@ -1,29 +1,49 @@
 import { Image } from "expo-image";
 import styled from "styled-components/native";
 
-export const Container = styled.View`
-    flex: 1;;
+export const TouchContainer = styled.TouchableOpacity<{ width: string }>`
+    width: ${p => p.width}%;
+`;
+
+export const CardContainer = styled.View`
     flex-direction: column;
-    justify-content: flex-start;
-    align-items: flex-start;
+    background-color: ${({ theme }) => theme.colors.darkBackground};
+    border-radius: 16px;
+    overflow: hidden;
 `;
 
 export const ImageContainer = styled.View`
-    position: relative;    
-    border-radius: 20px;
-    margin-bottom: 8px;
-    overflow: hidden;
+    position: relative;
     width: 100%;
-    height: 174px;
+    height: 160px;
 `;
 
 export const CoverImg = styled(Image)`
-    position:absolute;
+    position: absolute;
     inset: 0;
 `;
 
-export const TouchContainer = styled.TouchableOpacity<{ width: string }>`
-    height: 100%;
-    max-height: 230px;
-    width: ${p => p.width}%;
+export const CardInfo = styled.View`
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px 12px;
+    gap: 8px;
+`;
+
+export const CardTextGroup = styled.View`
+    flex: 1;
+    gap: 2px;
+`;
+
+export const BadgeContainer = styled.View<{color: string}>`
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    flex-direction: row;
+    align-items: center;
+    background-color: ${p => p.color};
+    border-radius: 20px;
+    gap: 4px;
+    padding: 4px 10px;
 `;

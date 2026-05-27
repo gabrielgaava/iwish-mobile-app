@@ -3,28 +3,41 @@ import { KeyboardAvoidingView, Platform, ScrollView, useWindowDimensions } from 
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import styled from "styled-components/native";
 
-export const ScrollScreen = ({ children }: { children: React.ReactNode }) => {
+type ScrollScreenProps = {
+  children: React.ReactNode;
+  indicator: boolean;
+  grow?: boolean;
+  /** Padding extra no rodapé — use TAB_BAR_SCROLL_INSET em telas dentro de tabs */
+  bottomSpacing?: number;
+};
+
+export const ScrollScreen = ({
+  children,
+  indicator = false,
+  grow = true,
+  bottomSpacing = 0,
+}: ScrollScreenProps) => {
   const { height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
+  const minHeight = height - insets.top - insets.bottom;
 
   return (
     <StyledSafeArea>
       <KeyboardAvoidingView
-        style={{flex: 1}}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: grow ? 1 : undefined }}
+        behavior={Platform.OS === "ios" ? "padding" : "padding"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
       >
         <ScrollView
           contentContainerStyle={{
             flexGrow: 1,
-            justifyContent: "flex-start",
+            minHeight,
+            paddingBottom: bottomSpacing,
           }}
-          showsVerticalScrollIndicator={false}
+          showsVerticalScrollIndicator={indicator}
           keyboardShouldPersistTaps="handled"
         >
-          <Container>
-            {children}
-          </Container>
+          {children}
         </ScrollView>
       </KeyboardAvoidingView>
     </StyledSafeArea>
@@ -34,8 +47,4 @@ export const ScrollScreen = ({ children }: { children: React.ReactNode }) => {
 const StyledSafeArea = styled(SafeAreaView)`
   flex: 1;
   background-color: ${({ theme }) => theme.colors.screenBackground};
-`;
-
-const Container = styled.View`
-  flex: 1;
 `;

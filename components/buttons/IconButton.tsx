@@ -17,7 +17,7 @@ export default function IconButton(props: IconButtonProps) {
         align-items: center;
         width: ${buttonSize}px;
         height: ${buttonSize}px;
-        border-radius: 50%;
+        border-radius: ${buttonSize / 4}px;
         background-color: ${props.backgroundColor || "#ffffff30"};
     `
 

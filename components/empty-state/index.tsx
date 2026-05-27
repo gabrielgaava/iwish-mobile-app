@@ -4,10 +4,10 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useTheme } from "@react-navigation/native";
 import styled from 'styled-components/native';
-import { BorderButton } from "../buttons";
+import { CustomButton } from "../buttons";
 
 type EmptyStateProps = {
-    type: "wish" | "wishlist" | "users" | "notifications";
+    type: "wish" | "wishlist" | "publicWishlist" |"users" | "notifications";
     showButton?: boolean;
     onButtonPress?: () => void;
 }
@@ -22,21 +22,24 @@ export default function EmptyState(props: EmptyStateProps) {
     const icons = {
         wish: <Ionicons name="gift" size={ICON_SIZE} color={ICON_COLOR}/>,
         users: <Feather name="users" size={ICON_SIZE} color={ICON_COLOR} />,
-        wishlist: <Ionicons name="list-circle" size={ICON_SIZE} color={ICON_COLOR} />,
+        wishlist: <Ionicons name="list-outline" size={ICON_SIZE} color={ICON_COLOR} />,
+        publicWishlist: <Ionicons name="gift" size={ICON_SIZE} color={ICON_COLOR} />,
         notifications: <MaterialIcons name="notifications-off" size={ICON_SIZE} color={ICON_COLOR} />
     }
 
     const text = {
         wish: "Essa lista esta vazia",
         users: "Nenhum usuário encontrado",
-        wishlist: "Nenhuma lista de desejos encontrada",
+        wishlist: "Nenhuma lista criada",
+        publicWishlist: "Toda lista começa vazia...",
         notifications: "Nenhuma notificação por aqui"
     }
 
     const description = {
         wish: "Parece que não há nenhum item aqui. Que tal adicionar um novo desejo para começar a preencher essa lista?",
         users: "Enter a name or email to find people you know and connect with them. Sharing wishlists is more fun with friends!",
-        wishlist: "Parece que não há nenhuma lista de desejos aqui. Que tal criar uma nova lista para começar a adicionar seus desejos favoritos?",
+        wishlist: "Crie sua primeira lista e comece a adicionar tudo aquilo que você deseja.",
+        publicWishlist: "Parece que essa wishlist ainda está esperando o primeiro desejo ✨",
         notifications: "Você está em dia! Nenhuma notificação por aqui."
     }
 
@@ -55,11 +58,11 @@ export default function EmptyState(props: EmptyStateProps) {
             <Txt text={description[props.type]} size={14} color={colors.text70} />
             {props.showButton && (
                 <ButtonContainer>
-                    <BorderButton 
+                    <CustomButton
+                        variant="outline" 
                         onPress={handleButtonPress} 
-                        text="Adicionar item" 
+                        text="Adicionar / Criar" 
                         color={ICON_COLOR} 
-                        weight="regular"
                     />
                 </ButtonContainer>
             ) }

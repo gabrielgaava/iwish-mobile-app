@@ -2,12 +2,11 @@ import { useTheme } from "@react-navigation/native";
 import { useEffect, useRef, useState } from "react";
 import { Animated, Easing, StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import styled from "styled-components/native";
-import { Container } from '../ui/container';
 import { Txt } from "../ui/text";
 import { OTPCodeInputProps } from "./OTPCodeInput";
 
 
-export default function OTPCodeInput({ length = 6, error, onComplete }: OTPCodeInputProps) {
+export default function OTPCodeInput({ length = 6, error, onComplete, onChange }: OTPCodeInputProps) {
 
   const [code, setCode] = useState("");
   const inputRef = useRef<TextInput>(null);
@@ -29,6 +28,7 @@ export default function OTPCodeInput({ length = 6, error, onComplete }: OTPCodeI
     const numeric = text.replace(/[^0-9]/g, "");
     if (numeric.length <= length) {
       setCode(numeric);
+      onChange?.(numeric);
     }
   };
 
@@ -48,7 +48,12 @@ export default function OTPCodeInput({ length = 6, error, onComplete }: OTPCodeI
   const boxes = Array.from({ length }).map((_, i) => {
     const borderColor = animations[i].interpolate({
       inputRange: [0, 1],
-      outputRange: [colors.border, colors.primary],
+      outputRange: [colors.border30, colors.primary],
+    });
+
+    const backgroundColor = animations[i].interpolate({
+      inputRange: [0, 1],
+      outputRange: [colors.darkBackground, colors.background],
     });
 
     const scale = animations[i].interpolate({
@@ -58,6 +63,7 @@ export default function OTPCodeInput({ length = 6, error, onComplete }: OTPCodeI
 
     const boxAnimationStyle = {
       borderColor,
+      backgroundColor,
       transform: [{ scale }],
     };
 
@@ -90,19 +96,12 @@ export default function OTPCodeInput({ length = 6, error, onComplete }: OTPCodeI
   );
 }
 
-const Row = styled(Container)`
-  background: blue;
-`;
-
-const Cell = styled(Container)`
-  background: red;
-`;
-
 const Box = styled(Animated.View)`
-  width: 45px;
-  height: 55px;
+  width: 51px;
+  height: 64px;
   border-width: 1.5px;
-  border-color: ${p => p.theme.colors.border};
+  border-color: ${p => p.theme.colors.darkBackground};
+  background: ${p => p.theme.colors.darkBackground};
   border-radius: 8px;
   justify-content: center;
   align-items: center;
@@ -115,24 +114,11 @@ const styles = StyleSheet.create({
     width: "100%",
     alignSelf: "center",
   },
-  box: {
-    width: 45,
-    height: 55,
-    borderWidth: 1.5,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  boxFocused: {
-    borderColor: "#007AFF",
-  },
   digit: {
     fontSize: 22,
-    fontWeight: "500",
+    fontWeight: "700",
   },
   hiddenInput: {
-    // invisível, mas mantém o foco
     position: "absolute",
     opacity: 0,
     width: 0,
