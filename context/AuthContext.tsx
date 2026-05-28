@@ -17,7 +17,7 @@ type AuthState = {
   updateUser: (data: Partial<AuthUser>) => void;
 };
 
-const AUTH_STORAGE_KEY = "iWishApp-AuthState";
+const AUTH_STORAGE_KEY = "WishHubApp-AuthState";
 export const AuthContext = createContext<AuthState>({} as AuthState);
 
 export function AuthProvider({ children }: PropsWithChildren) {
@@ -82,6 +82,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
       idToken: data.idToken,
       name: data.name,
     });
+
+    console.log(response.data);
 
     if (response.status !== 200) {
       return { error: response.data, data: null };

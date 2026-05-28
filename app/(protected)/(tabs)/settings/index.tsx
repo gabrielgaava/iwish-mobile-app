@@ -152,7 +152,7 @@ export default function SettingsScreen() {
               />
               <SettingRow
                 icon={<Feather name="info" size={18} color={colors.primary} />}
-                label="Sobre o toWish"
+                label="Sobre o Wishhub"
                 onPress={() => {}}
               />
               <SettingRow

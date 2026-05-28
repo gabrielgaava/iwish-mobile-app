@@ -1,7 +1,7 @@
 import { getAppValue, setAppValue } from "@/lib/storage";
 import { useCallback, useEffect, useState } from "react";
 
-const STORAGE_KEY = "iWishApp-RecentSearches";
+const STORAGE_KEY = "WishHubApp-RecentSearches";
 const MAX_RECENTS = 8;
 
 export type RecentUser = {

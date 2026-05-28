@@ -11,7 +11,7 @@
     "ios": {
       "icon": "./assets/app.icon",
       "usesAppleSignIn": true,
-      "bundleIdentifier": "com.codifica.wishhub",
+      "bundleIdentifier": "com.room6.wishhub",
       "supportsTablet": true,
       "entitlements": {
         "com.apple.developer.applesignin": [
@@ -38,7 +38,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.codifica.android.wishhub",
+      "package": "com.room6.android.wishhub",
       "permissions": [
         "android.permission.RECORD_AUDIO"
       ]

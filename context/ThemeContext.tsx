@@ -2,7 +2,7 @@ import { getAppValue, setAppValue } from "@/lib/storage";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { useColorScheme } from "react-native";
 
-const STORAGE_KEY = "iWishApp-ThemePreference";
+const STORAGE_KEY = "WishHubApp-ThemePreference";
 
 type ThemePreference = "dark" | "light" | "system";
 

@@ -4,7 +4,7 @@ import { default as axios, AxiosError, AxiosInstance, AxiosResponse, InternalAxi
 
 const AUTH_PREFIX = "Bearer ";
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
-const AUTH_STORAGE_KEY = "iWishApp-AuthState";
+const AUTH_STORAGE_KEY = "WishHubApp-AuthState";
 
 export type ApiSuccess<T> = T;
 
