@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { api } from "@/lib/api";
 import Feather from "@expo/vector-icons/Feather";
 import { GoogleSignin, isSuccessResponse } from "@react-native-google-signin/google-signin";
-import * as AppleAuthentication from 'expo-apple-authentication';
+import * as AppleAuthentication from "expo-apple-authentication";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
@@ -23,10 +23,6 @@ type LoginForm = {
   password: string;
 };
 
-GoogleSignin.configure({
-  iosClientId: "604176384181-6qhbp4ditta249f7a3v2g09ln1di0tos.apps.googleusercontent.com",
-  webClientId: "604176384181-pds7paq5eu7bksivhn3347r31d40jp48.apps.googleusercontent.com",
-})
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -106,12 +102,22 @@ export default function LoginScreen() {
       await GoogleSignin.hasPlayServices();
       const response = await GoogleSignin.signIn();
 
-      if(isSuccessResponse(response)){
-        console.log("Google Response:", response.data);
+      if (isSuccessResponse(response)) {
+        const { error } = await socialSignIn({
+          provider: "google",
+          idToken: response.data.idToken!,
+        });
+
+        if (error) {
+          return setError(error?.code);
+        }
+
+        router.replace("/(protected)/(tabs)/(home)");
       }
-    }
-    catch (error) {
-      console.log(error);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsFetching(false);
     }
   }
 
@@ -121,16 +127,28 @@ export default function LoginScreen() {
         requestedScopes: [
           AppleAuthentication.AppleAuthenticationScope.EMAIL,
           AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-        ]
+        ],
       });
 
-      console.log(credentials);
-      socialSignIn({ provider: "apple", idToken: credentials.identityToken! });
-      router.replace("/(protected)/(tabs)/(home)")
-    }
+      const givenName = credentials.fullName?.givenName ?? "";
+      const familyName = credentials.fullName?.familyName ?? "";
+      const fullName = `${givenName} ${familyName}`.trim() || undefined;
 
-    catch (error) {
-      console.log(error);
+      const { error } = await socialSignIn({
+        provider: "apple",
+        idToken: credentials.identityToken!,
+        name: fullName,
+      });
+
+      if (error) {
+        return setError(error?.code);
+      }
+
+      router.replace("/(protected)/(tabs)/(home)");
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsFetching(false);
     }
   }
 

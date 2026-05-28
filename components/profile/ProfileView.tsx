@@ -9,7 +9,7 @@ import { useTheme } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
-import { Alert, View } from "react-native";
+import { Alert, RefreshControl, View } from "react-native";
 import styled from "styled-components/native";
 import EmptyState from "../empty-state";
 import BackHeader from "../ui/back-header";
@@ -24,6 +24,8 @@ type ProfileViewProps = {
   onWishlistOptions?: (wishlist: Wishlist) => void;
   /** Padding extra no rodapé — use TAB_BAR_SCROLL_INSET em telas dentro de tabs */
   bottomSpacing?: number;
+  refreshing?: boolean;
+  onRefresh?: () => void;
 };
 
 export function ProfileView({
@@ -33,6 +35,8 @@ export function ProfileView({
   onEditProfile,
   onWishlistOptions,
   bottomSpacing = 0,
+  refreshing = false,
+  onRefresh,
 }: ProfileViewProps) {
   const { colors } = useTheme();
   const [isFollowing, setIsFollowing] = useState(user.isFollowing);
@@ -80,8 +84,21 @@ export function ProfileView({
     [isOwnProfile, user.name]
   );
 
+  const refreshControl = useMemo(
+    () =>
+      onRefresh ? (
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor={colors.primary}
+          colors={[colors.primary]}
+        />
+      ) : undefined,
+    [refreshing, onRefresh, colors.primary]
+  );
+
   return (
-    <ScrollScreen indicator={false} bottomSpacing={bottomSpacing}>
+    <ScrollScreen indicator={false} bottomSpacing={bottomSpacing} refreshControl={refreshControl}>
 
       <View style={{ paddingHorizontal: 24 }}>
         <BackHeader />

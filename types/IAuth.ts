@@ -20,6 +20,7 @@ export type SessionStorage = Session & {
 export interface SocialLoginRequest {
   provider: "google" | "apple",
   idToken: string;
+  name?: string;
 }
 
 export type VerifyTypes = "email-verification" | "sign-in" | "forget-password";

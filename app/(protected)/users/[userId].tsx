@@ -6,29 +6,42 @@ import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
 import { ActivityIndicator, Alert, BackHandler } from "react-native";
 
+// Cache do último perfil público visitado — sobrevive a unmount/remount
+type ProfileCache = { userId: string; data: UserProfile };
+let profileCache: ProfileCache | null = null;
+
 export default function PublicUserProfileScreen() {
   const { userId, from } = useLocalSearchParams<{ userId: string; from?: string }>();
-  const [isFetching, setIsFetching] = useState(true);
-  const [user, setUser] = useState<UserProfile | null>(null);
   const { addRecent } = useRecentSearches();
 
-  const fetchProfileData = useCallback(async () => {
-    if (!userId) {
-      return;
+  const cachedData = profileCache?.userId === userId ? profileCache.data : null;
+  const [user, setUser] = useState<UserProfile | null>(cachedData);
+  const [isFetching, setIsFetching] = useState(cachedData === null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const fetchProfileData = useCallback(async (isRefresh = false) => {
+    if (!userId) return;
+
+    if (isRefresh) {
+      setIsRefreshing(true);
+    } else {
+      setIsFetching(true);
     }
 
-    setIsFetching(true);
     const response = await api.get<UserProfile>(`/users/${userId}`);
 
     if (response.status !== 200) {
       Alert.alert("Nao foi possivel carregar esse perfil.");
       setIsFetching(false);
+      setIsRefreshing(false);
       return;
     }
 
     const profileData: UserProfile = response.data;
+    profileCache = { userId, data: profileData };
     setUser(profileData);
     setIsFetching(false);
+    setIsRefreshing(false);
 
     addRecent({
       id: profileData.id,
@@ -38,9 +51,16 @@ export default function PublicUserProfileScreen() {
     });
   }, [userId, addRecent]);
 
+  const handleRefresh = useCallback(() => {
+    fetchProfileData(true);
+  }, [fetchProfileData]);
+
   useFocusEffect(useCallback(() => {
-    fetchProfileData();
-  }, [fetchProfileData]));
+    const isCached = profileCache?.userId === userId;
+    if (!isCached) {
+      fetchProfileData(false);
+    }
+  }, [fetchProfileData, userId]));
 
   const handleBack = useCallback(() => {
     const backRoute = from && !from.startsWith("/users/")
@@ -73,6 +93,8 @@ export default function PublicUserProfileScreen() {
     <ProfileView
       user={user}
       onBack={handleBack}
+      refreshing={isRefreshing}
+      onRefresh={handleRefresh}
     />
   );
 }

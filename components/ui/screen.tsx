@@ -9,6 +9,7 @@ type ScrollScreenProps = {
   grow?: boolean;
   /** Padding extra no rodapé — use TAB_BAR_SCROLL_INSET em telas dentro de tabs */
   bottomSpacing?: number;
+  refreshControl?: React.ReactElement;
 };
 
 export const ScrollScreen = ({
@@ -16,6 +17,7 @@ export const ScrollScreen = ({
   indicator = false,
   grow = true,
   bottomSpacing = 0,
+  refreshControl,
 }: ScrollScreenProps) => {
   const { height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -36,6 +38,7 @@ export const ScrollScreen = ({
           }}
           showsVerticalScrollIndicator={indicator}
           keyboardShouldPersistTaps="handled"
+          refreshControl={refreshControl}
         >
           {children}
         </ScrollView>

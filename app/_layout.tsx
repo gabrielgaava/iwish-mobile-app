@@ -5,12 +5,18 @@ import { PlusJakartaSans_300Light, PlusJakartaSans_400Regular, PlusJakartaSans_5
 import { useFonts } from "@expo-google-fonts/poppins";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { ThemeProvider } from "@react-navigation/native";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ThemeProvider as StyledThemeProvider } from "styled-components/native";
+
+GoogleSignin.configure({
+  iosClientId: "604176384181-6qhbp4ditta249f7a3v2g09ln1di0tos.apps.googleusercontent.com",
+  webClientId: "604176384181-pds7paq5eu7bksivhn3347r31d40jp48.apps.googleusercontent.com",
+});
 
 // Componente separado para poder consumir ThemeContext
 // (ThemeContextProvider precisa estar por fora)

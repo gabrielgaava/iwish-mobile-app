@@ -50,3 +50,18 @@ export async function getAppValue(key: string) {
     return null;
   }
 }
+
+/**
+ * Remove a key from secure storage (both platforms).
+ * Use this on sign-out or session invalidation instead of storing null.
+ */
+export async function deleteValue(key: string) {
+  try {
+    if (Platform.OS === "web") {
+      return await AsyncStorage.removeItem(key);
+    }
+    return await SecureStore.deleteItemAsync(key);
+  } catch (error) {
+    console.error("Error deleting secure value for key:", key, error);
+  }
+}

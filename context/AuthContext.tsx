@@ -1,7 +1,7 @@
 import { api, setApiAuthorization } from "@/lib/api";
-import { getValueFor, storageValue } from "@/lib/storage";
+import { deleteValue, getValueFor, storageValue } from "@/lib/storage";
 import { AuthResponse } from "@/types/ApiResponse";
-import { AuthUser, Session, SessionStorage, SocialLoginRequest } from "@/types/IAuth";
+import { AuthUser, SessionStorage, SocialLoginRequest } from "@/types/IAuth";
 import { useRouter } from "expo-router";
 import { createContext, PropsWithChildren, useEffect, useState } from "react";
 
@@ -9,9 +9,9 @@ type AuthState = {
   isLoggedIn: boolean;
   isReady: boolean;
   user: AuthUser | null;
-  signIn: (email: string, password: string) => any;
+  signIn: (email: string, password: string) => Promise<{ error: any; data: any }>;
   signInWithTokens: (tokenData: AuthResponse) => Promise<void>;
-  socialSignIn: (data: SocialLoginRequest) => any;
+  socialSignIn: (data: SocialLoginRequest) => Promise<{ error: any; data: any }>;
   signOut: () => void;
   getUser: () => Promise<AuthUser>;
   updateUser: (data: Partial<AuthUser>) => void;
@@ -21,7 +21,6 @@ const AUTH_STORAGE_KEY = "iWishApp-AuthState";
 export const AuthContext = createContext<AuthState>({} as AuthState);
 
 export function AuthProvider({ children }: PropsWithChildren) {
-  const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -30,46 +29,34 @@ export function AuthProvider({ children }: PropsWithChildren) {
   function applyAuthState(user: AuthUser, tokenData: AuthResponse) {
     setApiAuthorization(tokenData.accessToken);
     setUser(user);
-    setToken(tokenData.accessToken);
     setIsLoggedIn(true);
     setIsReady(true);
   }
 
-  // Set all data when a user is authenticated
   async function setAuthUser(user: AuthUser, tokenData: AuthResponse) {
     const storage: SessionStorage = {
       userId: user.id,
       isLoggedIn: true,
-      ...tokenData
-    }
-
-    console.log("Logged, Stored: ", storage);
+      ...tokenData,
+    };
 
     await storageValue(AUTH_STORAGE_KEY, storage);
-
     applyAuthState(user, tokenData);
   }
 
   async function signIn(email: string, password: string) {
+    const response = await api.post("/auth/login", { email, password });
 
-    const response = await api.post("/auth/login", { email, password })
-     
-      if(response.status !== 200) {
-        return { error: response.data, data: null };
-      }
+    if (response.status !== 200) {
+      return { error: response.data, data: null };
+    }
 
-      console.log(response.data);
-      const accessToken = response.data.accessToken;
+    setApiAuthorization(response.data.accessToken);
+    const user = await getUser();
+    await setAuthUser(user, response.data);
 
-      // Set the Authorizaiton Header in Axios Default
-      setApiAuthorization(accessToken);
-
-      // Fetch logged user data
-      const user = await getUser();
-      await setAuthUser(user, response.data);
-
-      return { error: null, data: response.data };
-  };
+    return { error: null, data: response.data };
+  }
 
   /**
    * Autentica o usuário a partir de tokens já obtidos (ex: após validação de OTP).
@@ -84,28 +71,27 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   async function signOut() {
     setIsLoggedIn(false);
-    setToken(null);
     setUser(null);
-    await storageValue(AUTH_STORAGE_KEY, null);
+    await deleteValue(AUTH_STORAGE_KEY);
     router.replace("/(auth)/welcome");
-  };
+  }
 
   async function socialSignIn(data: SocialLoginRequest) {
     const response = await api.post("/auth/social", {
       provider: data.provider,
       idToken: data.idToken,
-    })
+      name: data.name,
+    });
 
-    // Error in social Login
     if (response.status !== 200) {
-      return response.data;
+      return { error: response.data, data: null };
     }
 
     setApiAuthorization(response.data.accessToken);
     const user = await getUser();
     await setAuthUser(user, response.data);
 
-    router.replace("/(protected)/(tabs)/(home)");
+    return { error: null, data: response.data };
   }
 
   function updateUser(data: Partial<AuthUser>) {
@@ -113,30 +99,19 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }
 
   async function getUser(): Promise<AuthUser> {
-    const response = await api.get("/users/me")
-
-    if(response.status !== 200) {
-      console.log("Error Retrive User", response.data);
-    } 
-
-    return response.data;
-  }
-
-  async function refreshToken(refreshToken: string): Promise<Session> {
-    const response = await api.post("/auth/refresh", { refreshToken });
+    const response = await api.get("/users/me");
 
     if (response.status !== 200) {
-      throw Error("Error to refresh token. Login again!");
+      console.error("Error retrieving user", response.data);
     }
 
-    return response.data as Session;
+    return response.data;
   }
 
   function nullState() {
     setIsReady(true);
     setIsLoggedIn(false);
     setUser(null);
-    setToken(null);
   }
 
   async function loadAuthState() {
@@ -144,54 +119,40 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
     try {
       const data = await getValueFor(AUTH_STORAGE_KEY);
-      //console.log("Checking Local State", data);
 
-      if (data === null || data === undefined) {
+      if (!data) {
         return nullState();
       }
 
       const state: SessionStorage = JSON.parse(data);
 
-      if(state?.accessToken) {
-        setApiAuthorization(state.accessToken);
-        const response = await api.get("/users/me");
-
-        if(response.status >= 300) {
-          if (response.data.code === "TOKEN_EXPIRED") {
-              console.log("Session Expired - Using Refresh Token");            
-              const newSession = await refreshToken(state.refreshToken);
-              setApiAuthorization(newSession.accessToken);
-              const user = await getUser();
-              return setAuthUser(user, newSession);
-          }
-
-          return nullState();      
-        }
-
-        const latestData = await getValueFor(AUTH_STORAGE_KEY);
-        const latestState: SessionStorage = latestData ? JSON.parse(latestData) : state;
-
-        const session: AuthResponse = {
-          accessToken: latestState.accessToken,
-          refreshToken: latestState.refreshToken,
-          expiration: latestState.expiration,
-        };
-
-        return applyAuthState(response.data, session);
+      if (!state?.accessToken) {
+        return nullState();
       }
 
-      return nullState();
-    }
+      // Set auth header and attempt to load the user.
+      // The Axios interceptor handles TOKEN_EXPIRED transparently:
+      // it refreshes the session and retries the request automatically.
+      setApiAuthorization(state.accessToken);
+      const response = await api.get("/users/me");
 
-    catch (error) {
-      console.log(error);
+      if (response.status >= 300) {
+        return nullState();
+      }
+
+      const session: AuthResponse = {
+        accessToken: state.accessToken,
+        refreshToken: state.refreshToken,
+        expiration: state.expiration,
+      };
+
+      return applyAuthState(response.data, session);
+    } catch (error) {
+      console.error("Error loading auth state:", error);
       nullState();
-      alert("Error loading auth state");
     }
   }
 
-
-  //TODO: Check if token is expired. If is, use the refresh token for a new one
   useEffect(() => {
     loadAuthState();
   }, []);

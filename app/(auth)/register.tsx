@@ -1,14 +1,18 @@
 import { BorderButton, CustomButton } from "@/components/buttons";
 import { InputText } from "@/components/input";
+import MessageAlert from "@/components/message-alert";
 import { OrSection } from "@/components/or-section";
 import { ScrollScreen } from "@/components/ui/screen";
 import { Txt } from "@/components/ui/text";
 import { Icons } from "@/constants/icons";
 import i18n from "@/constants/region";
 import { nameRules, passwordRules, usernameRules } from "@/constants/rules";
+import { useAuth } from "@/hooks/useAuth";
 import { api } from "@/lib/api";
 import { RegisterForm } from "@/types/Forms";
 import Feather from "@expo/vector-icons/Feather";
+import { GoogleSignin, isSuccessResponse } from "@react-native-google-signin/google-signin";
+import * as AppleAuthentication from "expo-apple-authentication";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -19,12 +23,70 @@ import styled, { useTheme } from "styled-components/native";
 export default function RegisterScreen() {
   const router = useRouter();
   const { colors } = useTheme();
+  const { socialSignIn } = useAuth();
   const [isFetching, setIsFetching] = useState(false);
   const [serverError, setServerError] = useState("");
 
   const { control, handleSubmit } = useForm<RegisterForm>({
     defaultValues: { name: "", username: "", email: "", password: "" },
   });
+
+  async function handleGoogleSignIn() {
+    setIsFetching(true);
+    try {
+      await GoogleSignin.hasPlayServices();
+      const response = await GoogleSignin.signIn();
+
+      if (isSuccessResponse(response)) {
+        const { error } = await socialSignIn({
+          provider: "google",
+          idToken: response.data.idToken!,
+        });
+
+        if (error) {
+          return setServerError(error?.code);
+        }
+
+        router.replace("/(protected)/(tabs)/(home)");
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsFetching(false);
+    }
+  }
+
+  async function handleAppleSignIn() {
+    setIsFetching(true);
+    try {
+      const credentials = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+        ],
+      });
+
+      const givenName = credentials.fullName?.givenName ?? "";
+      const familyName = credentials.fullName?.familyName ?? "";
+      const fullName = `${givenName} ${familyName}`.trim() || undefined;
+
+      const { error } = await socialSignIn({
+        provider: "apple",
+        idToken: credentials.identityToken!,
+        name: fullName,
+      });
+
+      if (error) {
+        return setServerError(error?.code);
+      }
+
+      router.replace("/(protected)/(tabs)/(home)");
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsFetching(false);
+    }
+  }
 
   const handleSignUp: SubmitHandler<RegisterForm> = async (form) => {
     setIsFetching(true);
@@ -116,11 +178,7 @@ export default function RegisterScreen() {
           />
 
           {!!serverError && (
-            <Txt
-              text={i18n.t(serverError)}
-              color={colors.errorText}
-              style={{ marginBottom: 8 }}
-            />
+            <MessageAlert type="error" message={i18n.t(serverError)} />
           )}
 
           <ButtonWrapper>
@@ -136,14 +194,16 @@ export default function RegisterScreen() {
           <OrSection text={i18n.t("auth.register.orContinueWith")} />
           <SocialRow>
             <BorderButton
-              onPress={() => {}}
+              onPress={handleGoogleSignIn}
               text="Google"
+              loading={isFetching}
               icon={<Image source={Icons.google} style={{ width: 20, height: 20 }} />}
             />
             {Platform.OS === "ios" && (
               <BorderButton
-                onPress={() => {}}
+                onPress={handleAppleSignIn}
                 text="Apple"
+                loading={isFetching}
                 color={colors.text}
                 icon={<Image source={Icons.apple} style={{ width: 20, height: 20 }} />}
               />

@@ -9,6 +9,7 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
+      "icon": "./assets/app.icon",
       "usesAppleSignIn": true,
       "bundleIdentifier": "com.codifica.wishhub",
       "supportsTablet": true,

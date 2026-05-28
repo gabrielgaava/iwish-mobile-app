@@ -1,4 +1,4 @@
-import { getValueFor, storageValue } from "@/lib/storage";
+import { deleteValue, getValueFor, storageValue } from "@/lib/storage";
 import { SessionStorage } from "@/types/IAuth";
 import { default as axios, AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from "axios";
 
@@ -89,7 +89,7 @@ api.interceptors.response.use(
       }
       catch (refreshError) {
         refreshSessionPromise = null;
-        await storageValue(AUTH_STORAGE_KEY, null);
+        await deleteValue(AUTH_STORAGE_KEY);
         setApiAuthorization(undefined);
         return Promise.resolve(error.response);
       }
