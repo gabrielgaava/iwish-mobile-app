@@ -248,7 +248,7 @@ const FollowButton = styled.TouchableOpacity`
 
 const ProfileBody = styled.View`
   align-items: center;
-  padding: 10px 24px 0;
+  padding: 0px 24px 0;
   gap: 4px;
 `;
 

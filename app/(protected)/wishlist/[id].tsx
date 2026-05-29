@@ -179,21 +179,35 @@ export default function WishlistPage() {
       >
         <ButtonContainer>
           <CustomButton
+            height={36}
             text=""
             onPress={handleBack}
             variant="glass"
             color={colors.white}
-            icon={<Feather name="arrow-left" size={24} color={colors.white} />}
+            icon={<Feather name="arrow-left" size={22} color={colors.white} />}
           />
         </ButtonContainer>
         {isOwner && (
-          <ButtonContainer style={{ width: 140 }}>
+          <ButtonContainer style={{ width: 36 }}>
             <CustomButton
-              text="Gerenciar"
+              height={36}
+              text=""
               onPress={() => sheetOptions.current?.present()}
               variant="glass"
               color={colors.white}
-              icon={<Feather name="settings" size={24} color={colors.white} />}
+              icon={<Feather name="settings" size={20} color={colors.white} />}
+            />
+          </ButtonContainer>
+        )}
+        {!isOwner && (
+          <ButtonContainer style={{ width: 36 }}>
+            <CustomButton
+              height={36}
+              text=""
+              onPress={() => shareWishlist()}
+              variant="glass"
+              color={colors.white}
+              icon={<Feather name="share-2" size={20} color={colors.white} />}
             />
           </ButtonContainer>
         )}
@@ -267,8 +281,12 @@ export default function WishlistPage() {
           </Row>
         </SectionHeader>
 
-        {data?.wishes.length === 0 && (
+        {isOwner && data?.wishes.length === 0 && (
           <EmptyState type="wish" showButton onButtonPress={goToCreate} />
+        )}
+
+        {!isOwner && data?.wishes.length === 0 && (
+          <EmptyState type="publicWishlist" />
         )}
 
         {data && data.wishes.length > 0 && (
@@ -336,8 +354,8 @@ const HeaderButtonsOverlay = styled(Animated.View)`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding-left: 16px;
-  padding-right: 16px;
+  padding-left: 20px;
+  padding-right: 20px;
   z-index: 30;
 `;
 
@@ -409,7 +427,7 @@ const ItensGrid = styled.View`
 `;
 
 const ButtonContainer = styled.View`
-  width: 50px;
+  width: 36px;
 `;
 
 const LoadingScreen = styled.View`

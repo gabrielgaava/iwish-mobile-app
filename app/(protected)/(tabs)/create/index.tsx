@@ -72,7 +72,7 @@ function CreateOption({ type }: { type: "wish" | "wishlist"| "event" }) {
         <OptionIcon>
           {iconMap[type]}
         </OptionIcon>
-        <View>
+        <View style={{ flex: 1 }}>
           <Txt text={titleMap[type]} align="left" weight="bold" size={16} />
           <Txt text={descriptionMap[type]} align="left" />
         </View>
@@ -96,8 +96,8 @@ const OptionCard = styled.TouchableOpacity`
   background: ${props => props.theme.colors.background};
   border: solid 1px ${props => props.theme.colors.border30};
   border-radius: 8px;
-  height: 82px;
-  padding: 8px 16px;
+  min-height: 82px;
+  padding: 16px;
   opacity: ${p => p.disabled ? 0.4 : 1};
 `;
 

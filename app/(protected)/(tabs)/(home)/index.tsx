@@ -1,5 +1,6 @@
 import { LinkButton } from "@/components/buttons";
 import { FeedItem } from "@/components/feed";
+import { TabScrollView } from "@/components/ui/tab-scroll-view";
 import { Txt } from "@/components/ui/text";
 import { images } from "@/constants/images";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,18 +12,21 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTheme } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { useEffect, useState } from "react";
-import { RefreshControl, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { TabScrollView } from "@/components/ui/tab-scroll-view";
+import { useCreateWish } from "@/hooks/useCreateWish";
+import { router } from "expo-router";
+import { ActivityIndicator, RefreshControl, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import styled from "styled-components/native";
 
 export default function HomeScreen() {
   const { user } = useAuth();
   const { colors } = useTheme();
+  const { setPrefill } = useCreateWish();
 
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [feed, setFeed] = useState<FeedResponse | null>(null);
   const [importLink, setImportLink] = useState("");
+  const [isImporting, setIsImporting] = useState(false);
 
   async function fetchFeedData() {
     const response = await api.get("/feed");
@@ -39,6 +43,25 @@ export default function HomeScreen() {
   useEffect(() => {
     fetchFeedData();
   }, []);
+
+  async function handleImport() {
+    const url = importLink.trim();
+    if (!url) return;
+
+    setIsImporting(true);
+    const response = await api.post("/wish/scrap", { url });
+    setIsImporting(false);
+    setImportLink("");
+
+    setPrefill({
+      link: url,
+      title: response.data?.title || "",
+      price: response.data?.price?.toFixed(2) || "",
+      images: response.data?.images || [],
+    });
+
+    router.push("/(protected)/wish/create");
+  }
 
   const firstName = user?.name.split(" ")[0] ?? "";
 
@@ -93,10 +116,14 @@ export default function HomeScreen() {
             </ImportInputArea>
             <ImportButton
               activeOpacity={0.85}
-              onPress={() => {}}
-              style={{ backgroundColor: colors.primary }}
+              onPress={handleImport}
+              disabled={isImporting || !importLink.trim()}
+              style={{ backgroundColor: colors.primary, opacity: isImporting || !importLink.trim() ? 0.6 : 1 }}
             >
-              <Txt text="Importar" color={colors.white} weight="semi" size={14} />
+              {isImporting
+                ? <ActivityIndicator size={14} color={colors.white} />
+                : <Ionicons name="send" color={colors.white} size={14} />
+              }
             </ImportButton>
           </ImportRow>
 
@@ -186,7 +213,7 @@ const ImportInputArea = styled.View`
 
 const ImportButton = styled.TouchableOpacity`
   border-radius: 8px;
-  padding: 10px 18px;
+  padding: 12px;
   justify-content: center;
   align-items: center;
 `;

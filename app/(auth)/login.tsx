@@ -102,6 +102,8 @@ export default function LoginScreen() {
       await GoogleSignin.hasPlayServices();
       const response = await GoogleSignin.signIn();
 
+      console.log(response);
+
       if (isSuccessResponse(response)) {
         const { error } = await socialSignIn({
           provider: "google",

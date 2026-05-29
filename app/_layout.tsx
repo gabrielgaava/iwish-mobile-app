@@ -1,3 +1,4 @@
+import { ShareIntentHandler } from "@/components/ShareIntentHandler";
 import { CustomDarkTheme, CustomDefaultTheme } from "@/constants/theme";
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeContextProvider, useAppTheme } from "@/context/ThemeContext";
@@ -5,6 +6,7 @@ import { PlusJakartaSans_300Light, PlusJakartaSans_400Regular, PlusJakartaSans_5
 import { useFonts } from "@expo-google-fonts/poppins";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { ThemeProvider } from "@react-navigation/native";
+import { ShareIntentProvider } from "expo-share-intent";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -31,6 +33,7 @@ function ThemedApp() {
           <SafeAreaProvider>
             <BottomSheetModalProvider>
               <StatusBar style={isDarkMode ? "light" : "dark"} />
+              <ShareIntentHandler />
               <Stack>
                 <Stack.Screen name="(protected)" options={{ headerShown: false }} />
                 <Stack.Screen name="(auth)" options={{ headerShown: false }} />
@@ -55,9 +58,11 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeContextProvider>
-        <ThemedApp />
-      </ThemeContextProvider>
+      <ShareIntentProvider>
+        <ThemeContextProvider>
+          <ThemedApp />
+        </ThemeContextProvider>
+      </ShareIntentProvider>
     </GestureHandlerRootView>
   );
 }

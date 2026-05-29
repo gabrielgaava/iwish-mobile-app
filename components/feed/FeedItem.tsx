@@ -1,9 +1,11 @@
 import { images } from "@/constants/images";
+import i18n from "@/constants/region";
 import { FeedItem as FeedItemType } from "@/types/Feed";
 import { getRelativeTime, limitText, normalizeImageUri, toPrice } from "@/utils/format";
+import Feather from "@expo/vector-icons/Feather";
 import { useTheme } from "@react-navigation/native";
 import { router, usePathname } from "expo-router";
-import { Text } from "react-native";
+import { Linking, Text } from "react-native";
 import { BorderButton } from "../buttons";
 import { Txt } from "../ui/text";
 import {
@@ -40,6 +42,12 @@ export default function FeedItem({ data }: FeedItemProps) {
   const actionText =
     data.type === "wishlist_created" ? "criou uma lista" : "adicionou um desejo";
 
+  async function handleVisitWebsite(link: string | null) {
+    if(link != null) {
+      await Linking.openURL(link);
+    }
+  }
+  
   return (
     <Card style={{ paddingBottom: data.type === "wish_added" ? 16 : 0 }}>
       <ItemHeader>
@@ -128,7 +136,11 @@ export default function FeedItem({ data }: FeedItemProps) {
             </WishDetails>
           </WishRow>
           <DetailsButtonWrapper>
-            <BorderButton text="Ver Detalhes" onPress={() => {}} />
+            <BorderButton 
+              text={i18n.get("home.feed.goToWish")}
+              onPress={() => handleVisitWebsite(data.wish?.link || null)} 
+              icon={<Feather name="external-link" size={16} color={colors.text}/>}
+            />
           </DetailsButtonWrapper>
         </>
       )}

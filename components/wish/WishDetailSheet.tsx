@@ -81,6 +81,7 @@ export default function WishDetailSheet({
               loading={isUpdating}
               text={i18n.get("wish.actions.markAsPurchased")}
               onPress={() => onMarkPurchased(wish, true)}
+              icon={<Feather name="plus-square" size={16} color={colors.white}/>}
             />
           )}
           {wish.purchased_by === userId && (
@@ -88,11 +89,13 @@ export default function WishDetailSheet({
               loading={isUpdating}
               text={i18n.get("wish.actions.markAsUnpurchased")}
               onPress={() => onMarkPurchased(wish, false)}
+              icon={<Feather name="minus-square" size={16} color={colors.white}/>}
             />
           )}
           <BorderButton
             text={i18n.get("wish.actions.visit")}
             onPress={handleVisitWebsite}
+            icon={<Feather name="external-link" size={16} color={colors.text}/>}
           />
         </ModalContextAction>
       )}

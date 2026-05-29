@@ -78,6 +78,12 @@ const Portugese = {
     updatePassword: 'Atulizar senha',
   },
 
+  home: {
+    feed: {
+      goToWish: "Ver detalhes",
+    }
+  },
+
   wish: {
     reserved: "Comprado",
     youReserved: "Você Comprou",
@@ -152,6 +158,12 @@ const Portugese = {
       editDetails: "Editar detalhes",
       addItems: "Adicionar novos itens",
       deleteList: "Excluir permanentemente",
+      deleteConfirm: {
+        title: "Excluir lista?",
+        message: "Todos os itens desta lista serão excluídos permanentemente. Pessoas que marcaram itens como comprados também serão notificadas. Essa ação não pode ser desfeita.",
+        confirm: "Excluir",
+        cancel: "Cancelar",
+      },
     },
 
     create: {
@@ -212,6 +224,34 @@ const Portugese = {
     settings: "Config.",
   },
 
+  shareIntent: {
+    loading: "Buscando produto...",
+  },
+
+  emptyState: {
+    wish: {
+      title: "Esta lista está vazia",
+      description: "Parece que não há nenhum item aqui. Que tal adicionar um novo desejo para começar a preencher esta lista?",
+    },
+    users: {
+      title: "Nenhum usuário encontrado",
+      description: "Digite um nome ou e-mail para encontrar pessoas que você conhece e se conectar com elas.",
+    },
+    wishlist: {
+      title: "Nenhuma lista criada",
+      description: "Crie sua primeira lista e comece a adicionar tudo aquilo que você deseja.",
+    },
+    publicWishlist: {
+      title: "Toda lista começa vazia...",
+      description: "Parece que esta wishlist ainda está esperando o primeiro desejo ✨",
+    },
+    notifications: {
+      title: "Nenhuma notificação por aqui",
+      description: "Você está em dia! Volte mais tarde para ver suas novidades.",
+    },
+    addButton: "Adicionar / Criar",
+  },
+
   actions: {
     edit: "Editar",
     delete: "Deletar",
@@ -245,6 +285,7 @@ const English = {
   max: "Maximum ",
   characters: "characters",
   or: "Or",
+  money: "$",
 
   auth: {
     email: "E-mail",
@@ -275,8 +316,6 @@ const English = {
       privacyLink: "Privacy Policy",
     },
   },
-
-  money: "$",
 
   welcome: {
     tagline: "Your social network of wishes.",
@@ -313,6 +352,12 @@ const English = {
     doLogin: 'Remembered your password ?',
     doLoginBold: 'Sign-in',
     updatePassword: 'Update password',
+  },
+
+  home: {
+    feed: {
+      goToWish: "Go to wish",
+    }
   },
 
   wish: {
@@ -389,6 +434,12 @@ const English = {
       editDetails: "Edit details",
       addItems: "Add new items",
       deleteList: "Delete permanently",
+      deleteConfirm: {
+        title: "Delete list?",
+        message: "All items in this list will be permanently deleted. People who marked items as purchased will also be notified. This action cannot be undone.",
+        confirm: "Delete",
+        cancel: "Cancel",
+      },
     },
 
     create: {
@@ -447,6 +498,34 @@ const English = {
     create: "Create",
     profile: "Profile",
     settings: "Settings",
+  },
+
+  shareIntent: {
+    loading: "Fetching product...",
+  },
+
+  emptyState: {
+    wish: {
+      title: "This list is empty",
+      description: "Looks like there's nothing here yet. How about adding a new wish to start filling this list?",
+    },
+    users: {
+      title: "No users found",
+      description: "Enter a name or email to find people you know and connect with them. Sharing wishlists is more fun with friends!",
+    },
+    wishlist: {
+      title: "No lists created",
+      description: "Create your first list and start adding everything you wish for.",
+    },
+    publicWishlist: {
+      title: "Every list starts empty...",
+      description: "Looks like this wishlist is still waiting for its first wish ✨",
+    },
+    notifications: {
+      title: "No notifications here",
+      description: "You're all caught up! Check back later for updates.",
+    },
+    addButton: "Add / Create",
   },
 
   actions: {

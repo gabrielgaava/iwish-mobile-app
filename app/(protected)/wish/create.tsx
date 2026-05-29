@@ -6,6 +6,7 @@ import { WishFormData, WishReviewForm } from "@/components/wish/WishReviewForm";
 import { WishlistSelectCard } from "@/components/wishlist-select-card";
 import i18n from "@/constants/region";
 import { urlRules } from "@/constants/rules";
+import { useCreateWish } from "@/hooks/useCreateWish";
 import { api } from "@/lib/api";
 import { Wishlist } from "@/types/User";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -32,15 +33,18 @@ const defaultValues: FormData = {
 
 export default function CreateWishPage() {
   const { wishlistId } = useLocalSearchParams<{ wishlistId: string }>();
+  const { consumePrefill } = useCreateWish();
 
-  // Capture the initial param once so resets use the correct starting point
+  // Capture initial values once — prefill is consumed here and cleared from the store
   const initialWishlistId = useRef(wishlistId).current;
+  const initialPrefill = useRef(consumePrefill()).current;
+  const hasPrefill = !!initialPrefill?.link;
 
-  const [currentStep, setCurrentStep] = useState<Step>("link");
+  const [currentStep, setCurrentStep] = useState<Step>(hasPrefill ? "review" : "link");
   const [selectedWishlistId, setSelectedWishlistId] = useState<string | undefined>(initialWishlistId);
   const [isRequesting, setIsRequesting] = useState(false);
   const [isHighPriority, setIsHighPriority] = useState(false);
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<string[]>(hasPrefill ? initialPrefill!.images : []);
 
   // Used to force-remount SelectListStep so it re-fetches wishlists
   // after the user creates a new list and navigates back
@@ -52,7 +56,9 @@ export default function CreateWishPage() {
   const cameFromListCreate = useRef(false);
 
   const { control, handleSubmit, reset, setValue } = useForm<FormData>({
-    defaultValues,
+    defaultValues: hasPrefill
+      ? { link: initialPrefill!.link, title: initialPrefill!.title, price: initialPrefill!.price, notes: "" }
+      : defaultValues,
   });
 
   const resetScreen = useCallback(() => {
