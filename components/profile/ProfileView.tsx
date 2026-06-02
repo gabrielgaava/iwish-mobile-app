@@ -133,9 +133,6 @@ export function ProfileView({
       {/* Profile info */}
       <ProfileBody>
         <Txt text={user.name} weight="semi" size={20} align="center" />
-        {isOwnProfile && (
-          <Txt text={user.email} weight="regular" size={13} color={colors.text70} align="center" />
-        )}
         <Txt text={"@" + user.username} weight="regular" size={14} color={colors.text70} align="center" />
 
         {/* Stats — shown in both profiles */}
@@ -256,7 +253,7 @@ const StatsRow = styled.View`
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 28px;
+  gap: 16px;
   margin-top: 20px;
   padding: 14px 20px;
   border-radius: 16px;

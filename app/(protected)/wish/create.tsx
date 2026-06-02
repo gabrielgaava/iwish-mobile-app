@@ -1,4 +1,4 @@
-import { ActionButton, CustomButton, LinkButton } from "@/components/buttons";
+import { CustomButton, LinkButton } from "@/components/buttons";
 import { InputText } from "@/components/input";
 import BackHeader from "@/components/ui/back-header";
 import { Txt } from "@/components/ui/text";
@@ -348,7 +348,7 @@ function SelectListStep({ loading, onConfirm, onCreateNew }: SelectListStepProps
       <ListContainer>
         <CreateNewCard onPress={onCreateNew} activeOpacity={0.75}>
           <CreateNewIcon>
-            <AntDesign name="plus" size={24} color={colors.white} />
+            <AntDesign name="plus" size={24} color={colors.text70} />
           </CreateNewIcon>
           <ListTextGroup>
             <Txt
@@ -383,7 +383,7 @@ function SelectListStep({ loading, onConfirm, onCreateNew }: SelectListStepProps
       </ListContainer>
 
       <ButtonContainer>
-        <ActionButton
+        <CustomButton
           text={`${i18n.t("wish.create.confirmSelection")} →`}
           onPress={handleConfirm}
           disabled={!selectedId}
@@ -472,7 +472,7 @@ const CreateNewCard = styled.TouchableOpacity`
   border-radius: 12px;
   border-width: 1.5px;
   border-style: dashed;
-  border-color: ${({ theme }) => theme.colors.primary};
+  border-color: ${({ theme }) => theme.colors.border};
   background-color: ${({ theme }) => theme.colors.background};
 `;
 
@@ -480,7 +480,7 @@ const CreateNewIcon = styled.View`
   width: 48px;
   height: 48px;
   border-radius: 10px;
-  background-color: ${({ theme }) => theme.colors.primary};
+  background-color: ${({ theme }) => theme.colors.border30};
   align-items: center;
   justify-content: center;
 `;

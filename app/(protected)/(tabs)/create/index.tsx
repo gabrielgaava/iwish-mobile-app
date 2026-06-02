@@ -72,12 +72,14 @@ function CreateOption({ type }: { type: "wish" | "wishlist"| "event" }) {
         <OptionIcon>
           {iconMap[type]}
         </OptionIcon>
-        <View style={{ flex: 1 }}>
+        <OptionTextContainer>
           <Txt text={titleMap[type]} align="left" weight="bold" size={16} />
           <Txt text={descriptionMap[type]} align="left" />
-        </View>
+        </OptionTextContainer>
       </OptionCardRow>
-      <MaterialIcons name="chevron-right" size={24} color={colors.text50} />
+      <ArrowContainer>
+        <MaterialIcons name="chevron-right" size={24} color={colors.text50} />
+      </ArrowContainer>
     </OptionCard>
   );
 }
@@ -105,6 +107,11 @@ const OptionCardRow = styled.View`
   flex-direction: row;
   align-items: center;
   gap: 16px;
+  flex: 1;
+`;
+
+const OptionTextContainer = styled.View`
+  flex: 1;
 `;
 
 const OptionIcon = styled.View`
@@ -122,4 +129,9 @@ export const SoonBadge = styled.View`
   position: absolute;
   right: 0;
   top: 0;
+`;
+
+export const ArrowContainer = styled.View`
+  justify-content: center;
+  align-items: center;
 `;

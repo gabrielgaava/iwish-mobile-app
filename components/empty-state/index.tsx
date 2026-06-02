@@ -9,7 +9,7 @@ import styled from 'styled-components/native';
 import { CustomButton } from "../buttons";
 
 type EmptyStateProps = {
-    type: "wish" | "wishlist" | "publicWishlist" | "users" | "notifications";
+    type: "wish" | "wishlist" | "publicWishlist" | "users" | "notifications" | "feed";
     showButton?: boolean;
     onButtonPress?: () => void;
 }
@@ -26,7 +26,8 @@ export default function EmptyState(props: EmptyStateProps) {
         users: <Feather name="users" size={ICON_SIZE} color={ICON_COLOR} />,
         wishlist: <Ionicons name="list-outline" size={ICON_SIZE} color={ICON_COLOR} />,
         publicWishlist: <Ionicons name="gift" size={ICON_SIZE} color={ICON_COLOR} />,
-        notifications: <MaterialIcons name="notifications-off" size={ICON_SIZE} color={ICON_COLOR} />
+        notifications: <MaterialIcons name="notifications-off" size={ICON_SIZE} color={ICON_COLOR} />,
+        feed: <Feather name="bell-off" size={ICON_SIZE} color={ICON_COLOR} />
     }
 
     const handleButtonPress = useCallback(() => {

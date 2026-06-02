@@ -1,6 +1,7 @@
 import { deleteValue, getValueFor, storageValue } from "@/lib/storage";
 import { SessionStorage } from "@/types/IAuth";
 import { default as axios, AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from "axios";
+import { getLocales } from "expo-localization";
 
 const AUTH_PREFIX = "Bearer ";
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -15,8 +16,13 @@ export type ApiFailure = {
 
 export type ApiResult<T> = ApiSuccess<T> | ApiFailure;
 
+const deviceLocale = getLocales()[0]?.languageTag ?? "en";
+
 export const api: AxiosInstance = axios.create({
   baseURL: BASE_URL,
+  headers: {
+    "Accept-Language": deviceLocale,
+  },
 });
 
 type RetriableRequestConfig = InternalAxiosRequestConfig & {

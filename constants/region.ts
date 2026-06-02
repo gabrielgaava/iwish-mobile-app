@@ -108,7 +108,7 @@ const Portugese = {
       priceLabel: "Preço",
       notesLabel: "Notas",
       priority: "Alta Prioridade?",
-      pics: "Fotos do Item (Até 6)",
+      pics: "Fotos do Item (Até 3)",
       imagesOf: "IMAGENS",
       addImage: "ADD",
       save: "Salvar Item",
@@ -249,6 +249,10 @@ const Portugese = {
       title: "Nenhuma notificação por aqui",
       description: "Você está em dia! Volte mais tarde para ver suas novidades.",
     },
+    feed: {
+      title: "Seu feed está esperando por novidades ✨",
+      description: "Siga amigos para acompanhar suas wishlists e atividades. As novidades aparecerão aqui.",
+    },
     addButton: "Adicionar / Criar",
   },
 
@@ -384,7 +388,7 @@ const English = {
       priceLabel: "Price",
       notesLabel: "Notes",
       priority: "High Priority?",
-      pics: "Photos of the Item (Up to 6)",
+      pics: "Photos of the Item (Up to 3)",
       imagesOf: "IMAGES",
       addImage: "ADD",
       save: "Save Item",
@@ -524,6 +528,10 @@ const English = {
     notifications: {
       title: "No notifications here",
       description: "You're all caught up! Check back later for updates.",
+    },
+    feed: {
+      title: "Your feed is waiting for new updates ✨",
+      description: "Follow friends to keep up with their wishlists and activities. New updates will appear here.",
     },
     addButton: "Add / Create",
   },

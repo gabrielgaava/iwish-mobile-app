@@ -4,6 +4,7 @@ export type AuthUser = {
   name: string;
   username?: string;
   image?: string;
+  locale?: string;
 }
 
 export type Session = {

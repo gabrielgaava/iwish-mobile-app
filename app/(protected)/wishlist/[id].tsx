@@ -140,10 +140,10 @@ export default function WishlistPage() {
   }
 
   async function shareWishlist() {
-    const domain = process.env.DOMAIN;
+    const domain = process.env.EXPO_PUBLIC_DOMAIN;
 
     await Share.share({
-      message: `Veja minha wishlist no Wishhub 🎁 ${domain}/wishlist/${data?.id}`,
+      message: `Veja esta wishlist no Wishhub 🎁 \n ${domain}/wishlist/${data?.id}`,
     });
   }
 

@@ -1,6 +1,7 @@
 import UIBottomSheet from "@/components/bottom-sheet";
 import { BorderButton, CustomButton } from "@/components/buttons";
 import { Txt } from "@/components/ui/text";
+import { images } from "@/constants/images";
 import i18n from "@/constants/region";
 import { Wish } from "@/types/User";
 import { toPrice } from "@/utils/format";
@@ -59,7 +60,7 @@ export default function WishDetailSheet({
     >
       {wish && (
         <ModalRow>
-          <ModalImage source={wish.images?.[0]?.url} />
+          <ModalImage source={wish.images?.[0]?.url || images.coverPlaceholder} />
           <ModalTextColumn>
             <Txt
               text={wish.title}

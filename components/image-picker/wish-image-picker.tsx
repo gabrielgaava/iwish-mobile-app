@@ -8,7 +8,7 @@ import { useCallback, useMemo } from "react";
 import { Alert, Dimensions } from "react-native";
 import styled, { useTheme } from "styled-components/native";
 
-const MAX_IMAGES = 6;
+const MAX_IMAGES = 3;
 
 type WishImagePickerProps = {
   images: string[];

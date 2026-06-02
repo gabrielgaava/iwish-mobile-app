@@ -1,9 +1,11 @@
 import { LinkButton } from "@/components/buttons";
+import EmptyState from "@/components/empty-state";
 import { FeedItem } from "@/components/feed";
 import { TabScrollView } from "@/components/ui/tab-scroll-view";
 import { Txt } from "@/components/ui/text";
 import { images } from "@/constants/images";
 import { useAuth } from "@/hooks/useAuth";
+import { useCreateWish } from "@/hooks/useCreateWish";
 import { api } from "@/lib/api";
 import { FeedResponse } from "@/types/Feed";
 import { normalizeImageUri } from "@/utils/format";
@@ -11,9 +13,8 @@ import Feather from "@expo/vector-icons/Feather";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTheme } from "@react-navigation/native";
 import { Image } from "expo-image";
-import { useEffect, useState } from "react";
-import { useCreateWish } from "@/hooks/useCreateWish";
 import { router } from "expo-router";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, RefreshControl, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import styled from "styled-components/native";
@@ -134,19 +135,7 @@ export default function HomeScreen() {
 
           {feed?.data.length === 0 && (
             <EmptyFeed>
-              <Ionicons name="people-outline" size={40} color={colors.text70} />
-              <Txt
-                text="Nenhuma atividade ainda."
-                size={15}
-                color={colors.text70}
-                align="center"
-              />
-              <Txt
-                text="Siga amigos para ver o que eles estão desejando."
-                size={13}
-                color={colors.text70}
-                align="center"
-              />
+              <EmptyState type="feed" />
             </EmptyFeed>
           )}
 
@@ -227,5 +216,5 @@ const SectionHeader = styled.View`
 const EmptyFeed = styled.View`
   align-items: center;
   gap: 8px;
-  padding: 40px 20px;
+  padding: 10px 0px;
 `;
