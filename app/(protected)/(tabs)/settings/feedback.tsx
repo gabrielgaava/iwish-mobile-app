@@ -4,6 +4,7 @@ import { ScrollScreen } from "@/components/ui/screen";
 import { Txt } from "@/components/ui/text";
 import i18n from "@/constants/region";
 import { api, isOkay } from "@/lib/api";
+import { appendProcessedImage } from "@/utils/image";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Feather from "@expo/vector-icons/Feather";
 import { useTheme } from "@react-navigation/native";
@@ -18,7 +19,7 @@ const MAX_IMAGES = 3;
 
 type ImageItem = {
   uri: string;
-  base64: string;
+  width?: number;
 };
 
 export default function FeedbackScreen() {
@@ -58,14 +59,14 @@ export default function FeedbackScreen() {
       allowsMultipleSelection: true,
       selectionLimit: remainingSlots,
       allowsEditing: false,
-      base64: true,
-      quality: 0.8,
+      quality: 1,
     });
 
     if (!result.canceled && result.assets.length > 0) {
-      const newItems: ImageItem[] = result.assets
-        .filter((a) => a.base64)
-        .map((a) => ({ uri: a.uri, base64: a.base64! }));
+      const newItems: ImageItem[] = result.assets.map((a) => ({
+        uri: a.uri,
+        width: a.width,
+      }));
 
       setImages((prev) => [...prev, ...newItems].slice(0, MAX_IMAGES));
     }
@@ -90,10 +91,22 @@ export default function FeedbackScreen() {
 
     setLoading(true);
     try {
-      const response = await api.post("/bug-reports", {
-        description: description.trim(),
-        images: images.map((img) => img.base64),
-        metadata: buildMetadata(),
+      const form = new FormData();
+      form.append("description", description.trim());
+      form.append("metadata", JSON.stringify(buildMetadata()));
+
+      for (let i = 0; i < images.length; i++) {
+        await appendProcessedImage(
+          form,
+          "images",
+          { uri: images[i].uri, width: images[i].width },
+          "feedback",
+          `feedback-${Date.now()}-${i}.webp`
+        );
+      }
+
+      const response = await api.post("/bug-reports", form, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
       if (isOkay(response)) {

@@ -29,10 +29,9 @@ export function AvatarPicker({ uri, size, onSelect }: AvatarPickerProps) {
 
     const result = await ExpoImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
-      base64: true,
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 0.8,
+      quality: 1,
     });
 
     if (!result.canceled) {

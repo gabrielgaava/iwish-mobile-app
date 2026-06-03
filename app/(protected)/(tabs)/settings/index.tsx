@@ -12,7 +12,7 @@ import { useTheme } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { ReactNode } from "react";
-import { View } from "react-native";
+import { Linking, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import styled from "styled-components/native";
 
@@ -152,13 +152,13 @@ export default function SettingsScreen() {
               />
               <SettingRow
                 icon={<Feather name="info" size={18} color={colors.primary} />}
-                label="Sobre o Wishhub"
-                onPress={() => {}}
+                label="Politica de Privacidade"
+                onPress={() => Linking.openURL("https://wishhub.co/privacidade")}
               />
               <SettingRow
                 icon={<Feather name="file-text" size={18} color={colors.primary} />}
                 label="Termos de Uso"
-                onPress={() => {}}
+                onPress={() => Linking.openURL("https://wishhub.co/termos")}
                 isLast
               />
             </SectionCard>

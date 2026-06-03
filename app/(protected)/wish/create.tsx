@@ -9,6 +9,7 @@ import { urlRules } from "@/constants/rules";
 import { useCreateWish } from "@/hooks/useCreateWish";
 import { api } from "@/lib/api";
 import { Wishlist } from "@/types/User";
+import { appendWishImages } from "@/utils/image";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Feather from "@expo/vector-icons/Feather";
 import Foundation from "@expo/vector-icons/Foundation";
@@ -148,13 +149,17 @@ export default function CreateWishPage() {
 
   async function createWish(data: FormData, targetWishlistId: string) {
     setIsRequesting(true);
-    const response = await api.post(`/wishlist/${targetWishlistId}/wish`, {
-      title: data.title,
-      notes: data.notes,
-      price: Number(data.price),
-      url: data.link,
-      images,
-      highPriority: isHighPriority,
+
+    const form = new FormData();
+    form.append("title", data.title);
+    form.append("notes", data.notes);
+    form.append("price", String(Number(data.price)));
+    form.append("url", data.link);
+    form.append("highPriority", String(isHighPriority));
+    await appendWishImages(form, images);
+
+    const response = await api.post(`/wishlist/${targetWishlistId}/wish`, form, {
+      headers: { "Content-Type": "multipart/form-data" },
     });
     setIsRequesting(false);
 

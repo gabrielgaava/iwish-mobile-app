@@ -1,6 +1,7 @@
-import { WishReviewForm, WishFormData } from "@/components/wish/WishReviewForm";
+import { WishFormData, WishReviewForm } from "@/components/wish/WishReviewForm";
 import i18n from "@/constants/region";
 import { api } from "@/lib/api";
+import { appendWishImages } from "@/utils/image";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useTheme } from "@react-navigation/native";
 import { router, useLocalSearchParams } from "expo-router";
@@ -56,13 +57,18 @@ export default function EditWishPage() {
     async (data: WishFormData) => {
       setIsSaving(true);
 
-      const response = await api.put(`/wish/${id}`, {
-        title: data.title,
-        notes: data.notes,
-        price: Number(data.price),
-        url: data.link,
-        images: wishImages,
-        highPriority: isHighPriority,
+      const form = new FormData();
+      form.append("title", data.title);
+      form.append("notes", data.notes);
+      form.append("price", String(Number(data.price)));
+      form.append("url", data.link);
+      form.append("highPriority", String(isHighPriority));
+      await appendWishImages(form, wishImages);
+
+      console.log("Form Save:", form);
+
+      const response = await api.put(`/wish/${id}`, form, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
       setIsSaving(false);

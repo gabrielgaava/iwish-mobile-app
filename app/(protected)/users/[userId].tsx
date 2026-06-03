@@ -6,15 +6,26 @@ import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
 import { ActivityIndicator, Alert, BackHandler } from "react-native";
 
-// Cache do último perfil público visitado — sobrevive a unmount/remount
-type ProfileCache = { userId: string; data: UserProfile };
-let profileCache: ProfileCache | null = null;
+// Cache de perfis públicos visitados — sobrevive a unmount/remount
+const CACHE_TTL_MS = 3 * 60 * 1000; // 3 minutos
+type CacheEntry = { data: UserProfile; cachedAt: number };
+const profileCache = new Map<string, CacheEntry>();
+
+function getCached(userId: string): UserProfile | null {
+  const entry = profileCache.get(userId);
+  if (!entry) return null;
+  return Date.now() - entry.cachedAt < CACHE_TTL_MS ? entry.data : null;
+}
+
+export function invalidateProfileCache(userId: string) {
+  profileCache.delete(userId);
+}
 
 export default function PublicUserProfileScreen() {
   const { userId, from } = useLocalSearchParams<{ userId: string; from?: string }>();
   const { addRecent } = useRecentSearches();
 
-  const cachedData = profileCache?.userId === userId ? profileCache.data : null;
+  const cachedData = userId ? getCached(userId) : null;
   const [user, setUser] = useState<UserProfile | null>(cachedData);
   const [isFetching, setIsFetching] = useState(cachedData === null);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -38,7 +49,7 @@ export default function PublicUserProfileScreen() {
     }
 
     const profileData: UserProfile = response.data;
-    profileCache = { userId, data: profileData };
+    profileCache.set(userId, { data: profileData, cachedAt: Date.now() });
     setUser(profileData);
     setIsFetching(false);
     setIsRefreshing(false);
@@ -56,8 +67,7 @@ export default function PublicUserProfileScreen() {
   }, [fetchProfileData]);
 
   useFocusEffect(useCallback(() => {
-    const isCached = profileCache?.userId === userId;
-    if (!isCached) {
+    if (!getCached(userId)) {
       fetchProfileData(false);
     }
   }, [fetchProfileData, userId]));
@@ -89,12 +99,17 @@ export default function PublicUserProfileScreen() {
     return null;
   }
 
+  const handleFollowChange = useCallback(() => {
+    invalidateProfileCache(userId);
+  }, [userId]);
+
   return (
     <ProfileView
       user={user}
       onBack={handleBack}
       refreshing={isRefreshing}
       onRefresh={handleRefresh}
+      onFollowChange={handleFollowChange}
     />
   );
 }

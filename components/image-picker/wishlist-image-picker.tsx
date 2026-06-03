@@ -28,7 +28,6 @@ export default function WishlistImagePicker({ limit, onSelect, initialImage }: I
 
     const result = await ExpoImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
-      base64: true,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,

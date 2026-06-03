@@ -7,6 +7,7 @@ import i18n from "@/constants/region";
 import { useAuth } from "@/hooks/useAuth";
 import { api } from "@/lib/api";
 import { UserProfile } from "@/types/User";
+import { appendProcessedImage } from "@/utils/image";
 import Feather from "@expo/vector-icons/Feather";
 import { useTheme } from "@react-navigation/native";
 import * as ExpoImagePicker from "expo-image-picker";
@@ -50,13 +51,23 @@ export default function EditProfileScreen() {
     async (data: EditProfileFormData) => {
       setIsSaving(true);
 
-      const payload: Partial<UserProfile> & { image?: string | null } = {
-        name: data.name,
-        username: data.username,
-        ...(avatarAsset?.base64 && { image: avatarAsset.base64 }),
-      };
+      const form = new FormData();
+      form.append("name", data.name);
+      form.append("username", data.username);
 
-      const response = await api.patch<UserProfile>("/users/me", payload);
+      if (avatarAsset) {
+        await appendProcessedImage(
+          form,
+          "image",
+          { uri: avatarAsset.uri, width: avatarAsset.width },
+          "avatar",
+          "avatar.webp"
+        );
+      }
+
+      const response = await api.patch<UserProfile>("/users/me", form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       if (response.status !== 200) {
         Alert.alert(i18n.t("profile.edit.error"));

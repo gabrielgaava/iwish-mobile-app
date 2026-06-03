@@ -44,7 +44,7 @@ export const CoverOverlay = styled.View`
   left: 0;
   right: 0;
   padding: 14px 16px;
-  background-color: rgba(0, 0, 0, 0.45);
+  background-color: rgba(0, 0, 0, 0);
 `;
 
 export const WishRow = styled.View`
@@ -67,5 +67,5 @@ export const WishDetails = styled.View`
 
 export const DetailsButtonWrapper = styled.View`
   height: 44px;
-  margin: 14px;
+  margin: 14px 14px 6px 14px;
 `;

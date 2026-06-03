@@ -12,13 +12,17 @@ type ButtonProps = {
   icon?: ReactNode,
   color?: string,
   weight?: "regular" | "semi" | "bold",
+  height?: number;
 }
 
 export default function BorderButton(props: ButtonProps) {
   const theme = useTheme();
 
+  const finalHeight = props.height ? props.height : 60;
+
   return (
     <Button 
+      height={finalHeight}
       onPress={props.onPress} 
       disabled={props.disabled || props.loading} 
       activeOpacity={0.8}
@@ -39,14 +43,15 @@ export default function BorderButton(props: ButtonProps) {
   )
 }
 
-const Button = styled.TouchableOpacity`
+const Button = styled.TouchableOpacity<{height: number}>`
   flex: 1;
   width: 100%;
-  height: 60px;
-  min-height: 60px;
+  height: ${p => p.height}px;
+  min-height: ${p => p.height}px;
   border-radius: 12px;
   overflow: hidden;
-  padding-horizontal: 12px;
+  padding-left: 12px;
+  padding-right: 12px;
   border-width: 1px;
   border-color: ${props => props.theme.colors.border};
   justify-content: center;

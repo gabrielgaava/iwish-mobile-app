@@ -23,7 +23,6 @@ export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [isFetching, setIsFetching] = useState(false);
   const [users, setUsers] = useState<UserSearchResponse[]>([]);
-  const [followedIds, setFollowedIds] = useState<Set<string>>(new Set());
 
   const handleSearch = useCallback(async (text: string) => {
     setQuery(text);
@@ -42,27 +41,21 @@ export default function SearchPage() {
     });
   }
 
-  async function handleFollowToggle(userId: string) {
-    const isFollowing = followedIds.has(userId);
+  const toggleFollowingById = useCallback((userId: string, value: boolean) => {
+    setUsers((prev) =>
+      prev.map((u) => (u.id === userId ? { ...u, isFollowing: value } : u))
+    );
+  }, []);
 
-    setFollowedIds((prev) => {
-      const next = new Set(prev);
-      isFollowing ? next.delete(userId) : next.add(userId);
-      return next;
-    });
+  async function handleFollowToggle(userId: string, isFollowing: boolean) {
+    toggleFollowingById(userId, !isFollowing);
 
     const response = isFollowing
       ? await api.delete(`/users/${userId}/follow`)
       : await api.post(`/users/${userId}/follow`);
 
-    const ok = [200, 201, 204].includes(response.status);
-
-    if (!ok) {
-      setFollowedIds((prev) => {
-        const next = new Set(prev);
-        isFollowing ? next.add(userId) : next.delete(userId);
-        return next;
-      });
+    if (![200, 201, 204].includes(response.status)) {
+      toggleFollowingById(userId, isFollowing);
     }
   }
 
@@ -93,7 +86,7 @@ export default function SearchPage() {
                 />
               )}
               {users.map((user) => {
-                const isFollowing = followedIds.has(user.id);
+                const { isFollowing } = user;
                 const subtitle = user.username ? `@${user.username}` : user.email;
 
                 return (
@@ -117,7 +110,7 @@ export default function SearchPage() {
                     <FollowButton
                       activeOpacity={0.8}
                       isFollowing={isFollowing}
-                      onPress={() => handleFollowToggle(user.id)}
+                      onPress={() => handleFollowToggle(user.id, isFollowing)}
                       style={{
                         backgroundColor: isFollowing ? colors.altBackground : "transparent",
                       }}

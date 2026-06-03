@@ -14,7 +14,7 @@ import { Linking } from "react-native";
 import styled from "styled-components/native";
 
 type Props = {
-  sheetRef: RefObject<BottomSheetModal|null>;
+  sheetRef: RefObject<BottomSheetModal | null>;
   wish: Wish | null;
   isOwner: boolean;
   isUpdating: boolean;
@@ -55,7 +55,7 @@ export default function WishDetailSheet({
   return (
     <UIBottomSheet
       ref={sheetRef}
-      snapPoints={["40%"]}
+      snapPoints={["50%"]}
       contentContainerStyle={{ padding: 18 }}
     >
       {wish && (
@@ -65,7 +65,7 @@ export default function WishDetailSheet({
             <Txt
               text={wish.title}
               align="left"
-              maxLength={80}
+              maxLength={70}
               size={18}
               style={{ width: "100%" }}
             />
@@ -82,7 +82,7 @@ export default function WishDetailSheet({
               loading={isUpdating}
               text={i18n.get("wish.actions.markAsPurchased")}
               onPress={() => onMarkPurchased(wish, true)}
-              icon={<Feather name="plus-square" size={16} color={colors.white}/>}
+              icon={<Feather name="plus-square" size={16} color={colors.white} />}
             />
           )}
           {wish.purchased_by === userId && (
@@ -90,24 +90,32 @@ export default function WishDetailSheet({
               loading={isUpdating}
               text={i18n.get("wish.actions.markAsUnpurchased")}
               onPress={() => onMarkPurchased(wish, false)}
-              icon={<Feather name="minus-square" size={16} color={colors.white}/>}
+              icon={<Feather name="minus-square" size={16} color={colors.white} />}
             />
           )}
           <BorderButton
             text={i18n.get("wish.actions.visit")}
             onPress={handleVisitWebsite}
-            icon={<Feather name="external-link" size={16} color={colors.text}/>}
+            icon={<Feather name="external-link" size={16} color={colors.text} />}
           />
         </ModalContextAction>
       )}
 
       {wish && isOwner && (
         <ModalContextAction>
+          <BorderButton
+            height={50}
+            text={i18n.get("wish.actions.visit")}
+            onPress={handleVisitWebsite}
+            icon={<Feather name="external-link" size={16} color={colors.text} />}
+          />
+
           <CustomButton
             text={i18n.get("actions.edit")}
             onPress={handleEdit}
             icon={<Feather name="edit" color={colors.white} />}
           />
+
           <CustomButton
             variant="outline"
             text={i18n.get("actions.delete")}
@@ -116,6 +124,8 @@ export default function WishDetailSheet({
             color={colors.errorText}
             loading={isUpdating}
           />
+
+
         </ModalContextAction>
       )}
     </UIBottomSheet>

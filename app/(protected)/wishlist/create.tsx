@@ -8,6 +8,7 @@ import { Txt } from "@/components/ui/text";
 import i18n from "@/constants/region";
 import { api } from "@/lib/api";
 import { FeatherIconName } from "@/types/Ui";
+import { appendProcessedImage } from "@/utils/image";
 import Feather from "@expo/vector-icons/Feather";
 import { useTheme } from "@react-navigation/native";
 import * as ExpoImagePicker from "expo-image-picker";
@@ -90,13 +91,24 @@ export default function CreateWishlistPage() {
   }
 
   async function createWishlist(data: WishlistFormData) {
-    const payload = {
-      ...data,
-      isPublic: isPublicState,
-      coverImage: newImage?.base64,
-    };
+    const form = new FormData();
+    form.append("name", data.name);
+    form.append("description", data.description);
+    form.append("isPublic", String(isPublicState));
 
-    const response = await api.post("/wishlist", payload);
+    if (newImage) {
+      await appendProcessedImage(
+        form,
+        "coverImage",
+        { uri: newImage.uri, width: newImage.width },
+        "cover",
+        "cover.webp"
+      );
+    }
+
+    const response = await api.post("/wishlist", form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
 
     if (response.status !== 200) {
       Alert.alert(i18n.t("wishlist.create.error"));
@@ -112,13 +124,28 @@ export default function CreateWishlistPage() {
   }
 
   async function updateWishlist(data: WishlistFormData) {
-    const payload = {
-      ...data,
-      isPublic: isPublicState,
-      coverImage: newImage?.base64 ?? coverImage ?? null,
-    };
+    const form = new FormData();
+    form.append("name", data.name);
+    form.append("description", data.description);
+    form.append("isPublic", String(isPublicState));
 
-    const response = await api.put(`/wishlist/${id}`, payload);
+    if (newImage) {
+      // Nova imagem do dispositivo -> upload do arquivo comprimido
+      await appendProcessedImage(
+        form,
+        "coverImage",
+        { uri: newImage.uri, width: newImage.width },
+        "cover",
+        "cover.webp"
+      );
+    } else if (coverImage) {
+      // Mantem a capa atual (URL ja hospedada) - enviada como texto
+      form.append("keepImages", coverImage);
+    }
+
+    const response = await api.put(`/wishlist/${id}`, form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
 
     if (response.status !== 200) {
       Alert.alert(i18n.t("wishlist.edit.error"));

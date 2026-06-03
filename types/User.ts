@@ -32,6 +32,7 @@ export type UserSearchResponse = {
   image: string | null;
   createdAt: string;
   updatedAt: string;
+  isFollowing: boolean;
 }
 
 export type UserSession = {

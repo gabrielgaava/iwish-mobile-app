@@ -4,6 +4,7 @@ import { FeedItem as FeedItemType } from "@/types/Feed";
 import { getRelativeTime, limitText, normalizeImageUri, toPrice } from "@/utils/format";
 import Feather from "@expo/vector-icons/Feather";
 import { useTheme } from "@react-navigation/native";
+import { LinearGradient } from "expo-linear-gradient";
 import { router, usePathname } from "expo-router";
 import { Linking, Text } from "react-native";
 import { BorderButton } from "../buttons";
@@ -43,11 +44,11 @@ export default function FeedItem({ data }: FeedItemProps) {
     data.type === "wishlist_created" ? "criou uma lista" : "adicionou um desejo";
 
   async function handleVisitWebsite(link: string | null) {
-    if(link != null) {
+    if (link != null) {
       await Linking.openURL(link);
     }
   }
-  
+
   return (
     <Card style={{ paddingBottom: data.type === "wish_added" ? 16 : 0 }}>
       <ItemHeader>
@@ -89,6 +90,10 @@ export default function FeedItem({ data }: FeedItemProps) {
             contentFit="cover"
           />
           <CoverOverlay>
+            <LinearGradient
+              colors={["transparent", "rgba(0,0,0,1)"]}
+              style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+            />
             <Txt
               text={data.wishlist.name}
               weight="bold"
@@ -136,10 +141,11 @@ export default function FeedItem({ data }: FeedItemProps) {
             </WishDetails>
           </WishRow>
           <DetailsButtonWrapper>
-            <BorderButton 
+            <BorderButton
+              height={50}
               text={i18n.get("home.feed.goToWish")}
-              onPress={() => handleVisitWebsite(data.wish?.link || null)} 
-              icon={<Feather name="external-link" size={16} color={colors.text}/>}
+              onPress={() => handleVisitWebsite(data.wish?.link || null)}
+              icon={<Feather name="external-link" size={16} color={colors.text} />}
             />
           </DetailsButtonWrapper>
         </>

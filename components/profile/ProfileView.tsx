@@ -26,6 +26,7 @@ type ProfileViewProps = {
   bottomSpacing?: number;
   refreshing?: boolean;
   onRefresh?: () => void;
+  onFollowChange?: () => void;
 };
 
 export function ProfileView({
@@ -37,6 +38,7 @@ export function ProfileView({
   bottomSpacing = 0,
   refreshing = false,
   onRefresh,
+  onFollowChange,
 }: ProfileViewProps) {
   const { colors } = useTheme();
   const [isFollowing, setIsFollowing] = useState(user.isFollowing);
@@ -53,8 +55,10 @@ export function ProfileView({
       setIsFollowing(false);
       setFollowerCount((prev) => prev - 1);
       Alert.alert("Erro", "Não foi possível seguir este usuário.");
+    } else {
+      onFollowChange?.();
     }
-  }, [user.id]);
+  }, [user.id, onFollowChange]);
 
   const handleUnfollow = useCallback(async () => {
     setIsFollowLoading(true);
@@ -67,10 +71,12 @@ export function ProfileView({
       setIsFollowing(true);
       setFollowerCount((prev) => prev + 1);
       Alert.alert("Erro", "Não foi possível deixar de seguir este usuário.");
+    } else {
+      onFollowChange?.();
     }
 
     setIsFollowLoading(false);
-  }, [user.id]);
+  }, [user.id, onFollowChange]);
 
   const wishlistCount = useMemo(() => user.wishlists?.length ?? 0, [user.wishlists]);
   const followingCount = useMemo(() => user.followings?.length ?? 0, [user.followings]);

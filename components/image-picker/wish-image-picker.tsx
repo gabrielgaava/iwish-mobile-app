@@ -47,10 +47,9 @@ export function WishImagePicker({ images, onAdd, onRemove }: WishImagePickerProp
 
     const result = await ExpoImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
-      base64: true,
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 0.8,
+      quality: 1,
     });
 
     if (!result.canceled && result.assets[0]) {
